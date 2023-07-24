@@ -1,6 +1,5 @@
 import * as React from "react";
 import SvgManager from "../../src/svg"
-import {Graph} from '@antv/x6'
 import CanvasManager from "../../src/canvas";
 
 const toImgSrc = (svg: SVGSVGElement) => {
@@ -44,80 +43,8 @@ export default function App() {
             canvas.startListening()
         }
 
-
-        //canvas.translateBy(100, 100)
-
-
-        /*const container = document.getElementById('container')
-        const graph = new Graph({
-            container: container!,
-            panning: true,
-            grid: {
-                visible: false,
-            },
-            mousewheel: {
-                enabled: true,
-                modifiers: ['ctrl', 'meta'],
-                minScale: 0.5,
-                maxScale: 2,
-            },
-        })
-
-        const rect = graph.addNode({
-            shape: 'rect',
-            x: 100,
-            y: 100,
-            width: 90,
-            height: 60,
-            attrs: {
-                body: {
-                    fill: '#ff9c6e',
-                    stroke: '#ff7a45',
-                },
-                label: {
-                    text: 'A',
-                },
-            },
-        })
-
-        rect.on('removed', () => {
-            console.log('rect was removed')
-        })
-
-        const circle = graph.addNode({
-            shape: 'circle',
-            x: 200,
-            y: 200,
-            width: 40,
-            height: 40,
-            attrs: {
-                body: {
-                    fill: '#d3f261',
-                    stroke: '#bae637',
-                },
-                label: {
-                    text: 'B',
-                },
-            },
-        })
-
-        graph.addEdge({
-            source: rect,
-            target: circle,
-        })
-
-        graph.center()
-        graph.translateBy(100, 100)
-        graph.on('translate', ({tx, ty}) => {
-
-            m.translate(tx, ty)
-        })
-        graph.on('scale', ({sx, sy, ox, oy}) => {
-            m.scale(sx, sy, ox, oy)
-        })*/
-        //console.log('graph-getTranslation',graph.transform.getTranslation());
         return () => {
-            //m.stopListening()
+            m.stopListening()
         }
     }, [])
 

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/viewport-manager.iml" filepath="$PROJECT_DIR$/.idea/viewport-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/draggable-viewport.iml" filepath="$PROJECT_DIR$/.idea/draggable-viewport.iml" />
     </modules>
   </component>
 </project>

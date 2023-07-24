@@ -1,7 +1,7 @@
 {
   "name": "draggable-viewport",
   "version": "1.0.0",
-  "description": "moveable-viewport",
+  "description": "draggable-viewport",
   "scripts": {
     "dev": "cd examples & ts-node run.ts",
     "dev-vite": "cd examples & vite",
@@ -38,17 +38,17 @@
     "vite-plugin-checker": "^0.4.9"
   },
   "keywords": [
-    "viewport-manager",
+    "draggable-viewport",
     "svg-manager",
     "canvas-manager"
   ],
-  "homepage": "https://github.com/robertpanvip/viewport-manager.git",
+  "homepage": "https://github.com/robertpanvip/draggable-viewport.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/robertpanvip/viewport-manager.git"
+    "url": "https://github.com/robertpanvip/draggable-viewport.git"
   },
   "bugs": {
-    "url": "https://github.com/robertpanvip/viewport-manager/issues"
+    "url": "https://github.com/robertpanvip/draggable-viewport/issues"
   },
   "author": "pan",
   "license": "ISC"

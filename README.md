@@ -1,7 +1,7 @@
 
 📦 **Installation**
 ``` javascript
-npm install @ts-pan/viewport
+npm install draggable-viewport
 ```
 🔨 **Usage**
 > Note: ``
