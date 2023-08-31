@@ -1,5 +1,5 @@
-import {MatrixLike, PointLike, Rotation, Scale, Translation} from "./interface";
-import {Rectangle, RectangleLike} from "./rectangle";
+import {MatrixLike, PointLike, Rotation, Scale, Translation, RectangleLike} from "./interface";
+import {Rectangle} from "./rectangle";
 
 export const ns = {
     svg: "http://www.w3.org/2000/svg",
@@ -41,15 +41,14 @@ export function createSVGMatrix(matrix?: DOMMatrix | MatrixLike | null) {
 }
 
 
-
 function deltaTransformPoint(matrix: DOMMatrix | MatrixLike, point: PointLike) {
     const dx = point.x * matrix.a + point.y * matrix.c
     const dy = point.x * matrix.b + point.y * matrix.d
-    return { x: dx, y: dy }
+    return {x: dx, y: dy}
 }
 
 export function matrixToRotation(matrix: DOMMatrix | MatrixLike): Rotation {
-    let p = { x: 0, y: 1 }
+    let p = {x: 0, y: 1}
     if (matrix) {
         p = deltaTransformPoint(matrix, p)
     }
@@ -83,7 +82,7 @@ export function matrixToTranslation(
     };
 }
 
-export function matrixToScale(matrix: DOMMatrix):Scale {
+export function matrixToScale(matrix: DOMMatrix): Scale {
     let a;
     let b;
     let c;
@@ -150,6 +149,7 @@ export function getComputedStyle(elem: Element, name?: string) {
 
     return computed
 }
+
 export function getBoundingOffsetRect(elem: HTMLElement) {
     let left = 0
     let top = 0
@@ -217,7 +217,7 @@ export function getBBox(
     if (!ownerSVGElement || !isSVGGraphicsElement(elem)) {
         if (isHTMLElement(elem)) {
             // If the element is a HTMLElement, return the position relative to the body
-            const { left, top, width, height } = getBoundingOffsetRect(elem as any)
+            const {left, top, width, height} = getBoundingOffsetRect(elem as any)
             return new Rectangle(left, top, width, height)
         }
         return new Rectangle(0, 0, 0, 0)

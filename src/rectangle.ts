@@ -1,9 +1,4 @@
-export interface RectangleLike {
-    x: number
-    y: number
-    width: number
-    height: number
-}
+import {RectangleLike} from "./interface";
 
 export class Rectangle {
     public x: number

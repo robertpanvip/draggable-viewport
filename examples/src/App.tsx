@@ -1,6 +1,7 @@
 import * as React from "react";
 import SvgManager from "../../src/svg"
 import CanvasManager from "../../src/canvas";
+import Rect from "../../src/shape/rect";
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -19,14 +20,14 @@ export default function App() {
     const canvasRef = React.useRef<HTMLCanvasElement>(null)
 
     React.useEffect(() => {
-        const m = new SvgManager({
-            svg: svgRef.current!,
-            viewport: gRef.current!,
-            minScale: 0.2,
-            maxScale: 4
-        })
-        m.startListening()
-        m.translateBy(100, 100)
+        /* const m = new SvgManager({
+             svg: svgRef.current!,
+             viewport: gRef.current!,
+             minScale: 0.2,
+             maxScale: 4
+         })
+         m.startListening()
+         m.translateBy(100, 100)*/
 
         const img = new Image()
         img.src = toImgSrc(svgRef.current!)
@@ -35,16 +36,22 @@ export default function App() {
                 viewport: canvasRef.current!,
                 minScale: 0.2,
                 maxScale: 8,
-                render(ctx) {
-                    ctx.drawImage(img, 0,0,750, 750)
-                    ctx.strokeRect(0,0,750,750)
-                }
             })
+            const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
+            rect1.name = 'rect1'
+            const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
+            rect2.style.background = 'red'
+            rect2.style.borderRadius = 100
+            rect2.name = 'rect2';
+            //rect2.rotate(90)
+            console.log(rect1,rect2);
+            canvas.addView(rect1)
+            canvas.addView(rect2)
             canvas.startListening()
         }
 
         return () => {
-            m.stopListening()
+            //m.stopListening()
         }
     }, [])
 

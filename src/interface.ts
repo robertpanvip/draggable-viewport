@@ -49,8 +49,13 @@ export interface SVGManagerOptions extends Options {
 
 export interface CanvasManagerOptions extends Options {
     viewport: HTMLCanvasElement;
-    render: (ctx: CanvasRenderingContext2D) => void
 }
 
+export interface RectangleLike {
+    x: number
+    y: number
+    width: number
+    height: number
+}
 
 export type Panning = undefined | boolean | ((target: Element) => boolean)

@@ -4,10 +4,10 @@ import {
     matrixToScale,
     matrixToTranslation,
 } from "./dom";
-import type {Options, Panning, Point, Rotation, Scaling, Translation} from "./interface";
-import {RectangleLike} from "./rectangle";
+import type {Options, Panning, Point, Rotation, Scaling, Translation, RectangleLike} from "./interface";
+import {Events} from "./event";
 
-export default abstract class DraggableViewport<T extends Element, O extends Options = {}> {
+export default abstract class DraggableViewport<T extends Element, O extends Options = {}> extends Events {
 
     minScale: number | null = null;
 
@@ -37,42 +37,19 @@ export default abstract class DraggableViewport<T extends Element, O extends Opt
                               maxScale,
                               panning = true,
                           }: O) {
+        super();
         if (scaling) {
             this.scaling = scaling;
         }
         this.minScale = minScale || null;
         this.maxScale = maxScale || null;
-        this.panning = panning
+        this.panning = panning;
+
     }
 
-    /**
-     * 是否允许拖动
-     * @param ele
-     * @private
-     */
-    private enablePanning(ele: Element): boolean {
-        return typeof this.panning === 'function' ? this.panning(ele) : !!this.panning
-    }
 
     protected abstract get root(): T;
 
-    /**
-     * 开始监听
-     */
-    startListening() {
-        // 监听鼠标按下事件
-        this.root.addEventListener("mousedown", this.onMouseDown);
-        this.root.addEventListener("wheel", this.onMouseWheel);
-    };
-
-    /**
-     * 停止监听
-     */
-    stopListening() {
-        // 监听鼠标按下事件
-        this.root.removeEventListener("mousedown", this.onMouseDown);
-        this.root.removeEventListener("wheel", this.onMouseWheel);
-    };
 
     /**
      * 获取元素的位置和尺寸信息
@@ -131,6 +108,7 @@ export default abstract class DraggableViewport<T extends Element, O extends Opt
         const matrix = this.getMatrix();
         matrix.e = tx || 0;
         matrix.f = ty || 0;
+
         this.setMatrix(matrix);
 
         return this;
@@ -223,8 +201,8 @@ export default abstract class DraggableViewport<T extends Element, O extends Opt
         const clickX = rect.x - left;
         const clickY = rect.y - top;
         return {
-            x: clickX,
-            y: clickY
+            x: clickX / this.ratio,
+            y: clickY / this.ratio
         }
     }
 
@@ -266,70 +244,5 @@ export default abstract class DraggableViewport<T extends Element, O extends Opt
         return targetScale
     }
 
-    onMouseWheel = (event: Event) => {
-        const evt = event as WheelEvent
-        // 判断是否按下了Ctrl键
-        const isCtrlPressed = evt.ctrlKey;
 
-        if (isCtrlPressed) {
-            evt.preventDefault();
-
-            const delta = evt.deltaY;
-
-            const targetScale = this.calcScale(delta)
-            const center = this.clientToGraph({x: evt.clientX, y: evt.clientY})
-
-            this.zoom(targetScale, center);
-
-            this.currentScale = null;
-            this.cumulatedFactor = 1;
-        }
-    };
-
-    onMouseDown = (evt: Event) => {
-        const event = evt as MouseEvent
-
-        const target = event.target as T;
-        const enable = this.enablePanning(target)
-        if (enable) {
-            this.isDragging = true;
-            this.clientX = event.clientX;
-            this.clientY = event.clientY;
-            // 监听鼠标移动事件
-            document.addEventListener("mousemove", this.onMouseMove);
-            document.addEventListener("drag", this.onMouseMove);
-            //document.addEventListener("touchmove", this.onMouseMove);
-
-            // 监听鼠标松开事件
-            document.addEventListener("mouseup", this.onMouseUp);
-            document.addEventListener("dragend", this.onMouseUp);
-            document.addEventListener("touchend", this.onMouseUp);
-            document.addEventListener("mouseleave", this.onMouseUp);
-        }
-    };
-
-    onMouseMove = (event: MouseEvent) => {
-        if (this.isDragging) {
-            const dx = event.clientX - this.clientX
-            const dy = event.clientY - this.clientY
-            this.clientX = event.clientX
-            this.clientY = event.clientY
-            this.translateBy(dx * this.ratio, dy * this.ratio);
-        }
-    };
-
-    onMouseUp = () => {
-        this.isDragging = false;
-        // 监听鼠标移动事件
-        document.removeEventListener("mousemove", this.onMouseMove);
-        document.removeEventListener("drag", this.onMouseMove);
-        //document.removeEventListener("touchmove", this.onMouseMove);
-
-        // 监听鼠标松开事件
-        document.removeEventListener("mouseup", this.onMouseUp);
-        // 监听鼠标松开事件
-        document.removeEventListener("dragend", this.onMouseUp);
-        document.removeEventListener("touchend", this.onMouseUp);
-        document.removeEventListener("mouseleave", this.onMouseUp);
-    };
 }
