@@ -13,11 +13,32 @@ const vm = new WeakMap<View, PrivateScope>()
 
 abstract class View extends Group {
 
-    constructor() {
-        super();
-        vm.set(this, {matrix: new DOMMatrix()})
+    abstract style: {
+        cursor?: string
     }
 
+    constructor() {
+        super();
+        vm.set(this, {matrix: new DOMMatrix()});
+        this.on('view:added', (vp: CanvasManager) => {
+            this.vp = vp;
+        })
+        let active: View | null;
+        this.on('dragStart', (e: { x: number, y: number, srcElement: View | null; }) => {
+            active = e.srcElement;
+        })
+        this.on('drag', ({dx, dy}: { dx: number, dy: number, srcElement: View | null; }) => {
+            if (active === this) {
+                const scale = this.vp.getScale();
+                const ratio = this.vp.ratio;
+                this?.translateBy(dx * ratio / scale.sx, dy * ratio / scale.sy)
+            }
+        })
+    }
+
+    public isView():this is View {
+        return true
+    }
 
     public get vp() {
         return vm.get(this)!.vp!
@@ -51,6 +72,20 @@ abstract class View extends Group {
         scope.matrix = matrix;
         this.vp?.render()
     };
+
+    getGroupMatrix() {
+
+
+        return this.vp.getMatrix().multiply(this.matrix)
+
+
+        /*return ancestors.reduce((pre, item) => {
+            if (item instanceof View) {
+                return pre.multiply(item.matrix)
+            }
+            return pre.multiply(new DOMMatrix())
+        }, this.vp.getMatrix()).multiply(this.matrix)*/
+    }
 
     /**获取位置方法**/
     getTranslation() {
@@ -103,6 +138,14 @@ abstract class View extends Group {
         return this.translate(tx, ty)
     }
 
+    addEventListener(name: string, callback: (e: any) => void) {
+        this.on(name, callback);
+    }
+
+    removeEventListener(name: string, callback: (e: any) => void) {
+        this.off(name, callback);
+    }
+
     getPointView(point: Point): Group | null {
         if (this.isPointContains(point)) {
             return this
@@ -111,7 +154,7 @@ abstract class View extends Group {
     }
 
     isPointInPolygon(x: number, y: number, points: { x: number, y: number }[]): boolean {
-        let isInside = false;
+        /*let isInside = false;
 
         const numPoints = points.length;
         let j = numPoints - 1;
@@ -125,7 +168,59 @@ abstract class View extends Group {
             j = i;
         }
 
-        return isInside;
+        return isInside;*/
+        const path = new Path2D();
+        points.forEach((vertex, index) => {
+            if (index === 0) {
+                path.moveTo(vertex.x, vertex.y);
+            } else {
+                path.lineTo(vertex.x, vertex.y);
+            }
+        })
+        path.closePath();
+        return this.ctx!.isPointInPath(path, x, y)
+    }
+
+    /**抽样点*/
+    samplePointsOnRoundRect(rectX: number, rectY: number, rectWidth: number, rectHeight: number, borderRadius: number, numSamples: number): Point[] {
+        const points: { x: number, y: number }[] = [];
+
+        const radius = Math.min(borderRadius, rectWidth / 2, rectHeight / 2);
+
+        let numArcSamples = Math.floor(numSamples / 4);
+        if (numArcSamples == 0) {
+            numArcSamples = 1
+        }
+        const arcAngleIncrement = Math.PI / (2 * numArcSamples);
+        for (let i = 0; i <= numArcSamples; i++) {
+            const angle = i * arcAngleIncrement;
+            const x = rectX + rectWidth - radius + radius * Math.cos(angle);
+            const y = rectY + rectHeight - radius + radius * Math.sin(angle);
+            points.push({x, y});
+        }
+
+        for (let i = 0; i <= numArcSamples; i++) {
+            const angle = i * arcAngleIncrement;
+            const x = rectX + radius - radius * Math.cos(angle);
+            const y = rectY + rectHeight - radius + radius * Math.sin(angle);
+            points.push({x, y});
+        }
+
+        for (let i = 0; i <= numArcSamples; i++) {
+            const angle = i * arcAngleIncrement;
+            const x = rectX + radius - radius * Math.cos(angle);
+            const y = rectY + radius - radius * Math.sin(angle);
+            points.push({x, y});
+        }
+
+        for (let i = 0; i <= numArcSamples; i++) {
+            const angle = i * arcAngleIncrement;
+            const x = rectX + rectWidth - radius + radius * Math.cos(angle);
+            const y = rectY + radius - radius * Math.sin(angle);
+            points.push({x, y});
+        }
+
+        return points;
     }
 
 }

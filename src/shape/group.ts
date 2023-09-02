@@ -1,13 +1,15 @@
 import {Events} from "../event";
 import {Point} from "../interface";
+import type View from "./view";
 
 type PrivateScope = {
-    zIndex: number
+    zIndex: number,
 }
 
 const vm = new WeakMap<Group, PrivateScope>()
 
 class Group extends Events {
+    public id: string = Math.floor((Math.random() * 1000000)).toString()
 
     public children: Group[] = []
 
@@ -17,7 +19,7 @@ class Group extends Events {
 
     constructor() {
         super();
-        vm.set(this, {zIndex: 0,})
+        vm.set(this, {zIndex: 0})
     }
 
     public get zIndex() {
@@ -28,13 +30,18 @@ class Group extends Events {
         vm.get(this)!.zIndex = val
     }
 
+    public isView():this is View {
+        return false
+    }
+
     public getChildren(): Group[] {
         return this.children.sort((a, b) => a.zIndex - b.zIndex)
     }
 
     addChild(child: Group) {
         child.parent = this;
-        return this.children.push(child)
+        this.children.push(child);
+        return this;
     }
 
     getChildAt(index: number) {
@@ -65,7 +72,7 @@ class Group extends Events {
 
     getAncestors(options: { deep?: boolean } = {}): Group[] {
         const ancestors: Group[] = []
-        let parent = this.parent
+        let parent = this.parent;
         while (parent) {
             ancestors.push(parent)
             parent = options.deep !== false ? parent.parent : null
@@ -127,11 +134,37 @@ class Group extends Events {
     }
 
     isPointContains(point: Point): boolean {
-        return this.children.some(child => child.isPointContains(point))
+        return false
+        //return this.children.some(child => child.isPointContains(point))
     }
 
     getChildGroupByPoint(point: Point): Group | null {
         return [...this.children].reverse().find(child => child.isPointContains(point)) || null
+    }
+
+    getSrcElement(point: Point): Group | null {
+        let srcEle = null;
+
+        const loop = (ele: Group): boolean => {
+            const contains = ele.isPointContains(point);
+            if (contains) {
+                srcEle = ele;
+                return true;
+            }
+
+            const children = ele.getChildren();
+            for (const child of children) {
+                const found = loop(child);
+                if (found) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        loop(this!);
+        return srcEle;
     }
 
     moveElementToEnd(element: Group) {

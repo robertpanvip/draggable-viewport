@@ -2,6 +2,7 @@ import * as React from "react";
 import SvgManager from "../../src/svg"
 import CanvasManager from "../../src/canvas";
 import Rect from "../../src/shape/rect";
+import Text from "../../src/shape/text";
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -39,14 +40,31 @@ export default function App() {
             })
             const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
             rect1.name = 'rect1'
+            rect1.addEventListener('dragStart',(e)=>{
+                //console.log('dragStart1',e)
+                //e.stopPropagation();
+            })
             const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
+            rect2.addEventListener('dragStart',(e)=>{
+                //console.log('dragStart2',e)
+            })
             rect2.style.background = 'red'
             rect2.style.borderRadius = 100
+            rect2.style.cursor = 'move'
             rect2.name = 'rect2';
             //rect2.rotate(90)
-            console.log(rect1,rect2);
+            //console.log(rect1, rect2);
+            rect1.addChild(rect2)
             canvas.addView(rect1)
-            canvas.addView(rect2)
+            //canvas.addView(rect2)
+            console.log(rect1.getGroupMatrix());
+            const text = new Text();
+            text.text = '这是测试文字'
+            //text.style.wrap = 'nowrap';
+            text.style.color = 'red';
+            text.style.cursor = 'pointer';
+            text.maxWidth = 120
+            canvas.addView(text)
             canvas.startListening()
         }
 

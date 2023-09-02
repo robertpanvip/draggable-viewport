@@ -2,6 +2,7 @@ import {Point} from "../interface";
 import View from "./view";
 
 type RectStyle = {
+    cursor?: string;
     borderColor?: string;
     borderWidth?: number;
     borderRadius?: number;
@@ -60,10 +61,11 @@ class Rect extends View {
     }
 
     getRenderMatrix() {
-        return this.vp.getMatrix().multiply(this.matrix)
+        return this.getGroupMatrix()
     }
 
     render() {
+        super.render();
         const ctx = this.ctx;
         ctx?.save()
         ctx!.setTransform(this.getRenderMatrix());
@@ -81,46 +83,7 @@ class Rect extends View {
         const h = bottomRight.y - leftTop.y;
         ctx!.strokeStyle = 'red'
         ctx!.strokeRect(leftTop.x, leftTop.y, w, h);*/
-        super.render();
-    }
 
-    samplePointsOnRoundRect(rectX: number, rectY: number, rectWidth: number, rectHeight: number, borderRadius: number, numSamples: number): Point[] {
-        const points: { x: number, y: number }[] = [];
-
-        const radius = Math.min(borderRadius, rectWidth / 2, rectHeight / 2);
-
-        const numArcSamples = Math.floor(numSamples / 4);
-        const arcAngleIncrement = Math.PI / (2 * numArcSamples);
-
-        for (let i = 0; i <= numArcSamples; i++) {
-            const angle = i * arcAngleIncrement;
-            const x = rectX + rectWidth - radius + radius * Math.cos(angle);
-            const y = rectY + rectHeight - radius + radius * Math.sin(angle);
-            points.push({x, y});
-        }
-
-        for (let i = 0; i <= numArcSamples; i++) {
-            const angle = i * arcAngleIncrement;
-            const x = rectX + radius - radius * Math.cos(angle);
-            const y = rectY + rectHeight - radius + radius * Math.sin(angle);
-            points.push({x, y});
-        }
-
-        for (let i = 0; i <= numArcSamples; i++) {
-            const angle = i * arcAngleIncrement;
-            const x = rectX + radius - radius * Math.cos(angle);
-            const y = rectY + radius - radius * Math.sin(angle);
-            points.push({x, y});
-        }
-
-        for (let i = 0; i <= numArcSamples; i++) {
-            const angle = i * arcAngleIncrement;
-            const x = rectX + rectWidth - radius + radius * Math.cos(angle);
-            const y = rectY + radius - radius * Math.sin(angle);
-            points.push({x, y});
-        }
-
-        return points;
     }
 
     isPointContains({x, y}: Point): boolean {
