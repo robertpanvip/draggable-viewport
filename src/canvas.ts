@@ -140,7 +140,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         }
     };
 
-    private dispatchSrcElementEvent(name: string, mouse: PointLike) {
+    private dispatchEvent(name: string, mouse: PointLike) {
         const srcEle = this.group.getSrcElement(mouse);
         // console.log(srcEle, name);
         const srcEleOwner = [];
@@ -184,7 +184,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
             const srcEle = this.group.getSrcElement(mouse);
             this.active = srcEle;
             //this.dispatchSrcElementEvent('dragStart', mouse)
-            this.broadcast('dragStart', {srcElement: srcEle, ...mouse})
+            this.broadcast('dragStartCapture', {srcElement: srcEle, ...mouse})
 
             if (srcEle) {
                 const loop = (srcEle: Group | null) => {
@@ -237,7 +237,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
 
             const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
             //const srcEle = this.group.getSrcElement(mouse);
-            this.broadcast('drag', {...mouse, dx, dy})
+            this.broadcast('dragCapture', {...mouse, dx, dy})
             //this.dispatchSrcElementEvent('drag', {...mouse, dx, dy})
             //console.timeEnd("drag")
         }
@@ -250,7 +250,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         const dy = event.clientY - this.clientY
         const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
         const srcEle = this.group.getSrcElement(mouse);
-        this.broadcast('dragEnd', {srcElement: srcEle, ...mouse, dx, dy})
+        this.broadcast('dragEndCapture', {srcElement: srcEle, ...mouse, dx, dy})
         //this.dispatchSrcElementEvent('dragEnd', mouse)
 
         // 监听鼠标移动事件

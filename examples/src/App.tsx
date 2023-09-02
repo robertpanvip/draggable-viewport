@@ -41,12 +41,13 @@ export default function App() {
             const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
             rect1.name = 'rect1'
             rect1.addEventListener('dragStart',(e)=>{
-                //console.log('dragStart1',e)
-                //e.stopPropagation();
+                console.log('dragStart1',e)
+
             })
             const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
             rect2.addEventListener('dragStart',(e)=>{
-                //console.log('dragStart2',e)
+                console.log('dragStart2',e)
+                e.stopPropagation();
             })
             rect2.style.background = 'red'
             rect2.style.borderRadius = 100

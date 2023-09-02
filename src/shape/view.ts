@@ -1,7 +1,7 @@
 import Group from "./group";
 import {matrixToRotation, matrixToTranslation} from "../dom";
 import type {Rotation, Translation, RectangleLike} from "../interface";
-import {Point} from "../interface";
+import {Point, PointLike} from "../interface";
 import CanvasManager from "../canvas";
 
 type PrivateScope = {
@@ -9,6 +9,14 @@ type PrivateScope = {
     matrix: DOMMatrix
 }
 
+interface CanvasEvent extends Point {
+    srcElement: Group | null;
+    eventName: string;
+
+    stopPropagation(): void
+}
+
+const eventVm = new WeakMap<CanvasEvent, { stopped: boolean }>()
 const vm = new WeakMap<View, PrivateScope>()
 
 abstract class View extends Group {
@@ -24,19 +32,35 @@ abstract class View extends Group {
             this.vp = vp;
         })
         let active: View | null;
-        this.on('dragStart', (e: { x: number, y: number, srcElement: View | null; }) => {
+        this.on('dragStartCapture', (e: { x: number, y: number, srcElement: View | null; }) => {
             active = e.srcElement;
+            if (active === this) {
+                this.dispatchEvent('dragStart', e)
+            }
         })
-        this.on('drag', ({dx, dy}: { dx: number, dy: number, srcElement: View | null; }) => {
+        this.on('dragCapture', (
+            {dx, dy, x, y}: { x: number, y: number, dx: number, dy: number }
+        ) => {
             if (active === this) {
                 const scale = this.vp.getScale();
                 const ratio = this.vp.ratio;
                 this?.translateBy(dx * ratio / scale.sx, dy * ratio / scale.sy)
+                this.dispatchEvent('drag', {x, y, srcElement: active})
+            }
+        })
+        this.on('dragEndCapture', (
+            {dx, dy, x, y}: { x: number, y: number, dx: number, dy: number }
+        ) => {
+            if (active === this) {
+                const scale = this.vp.getScale();
+                const ratio = this.vp.ratio;
+                this?.translateBy(dx * ratio / scale.sx, dy * ratio / scale.sy)
+                this.dispatchEvent('dragEnd', {x, y, srcElement: active})
             }
         })
     }
 
-    public isView():this is View {
+    public isView(): this is View {
         return true
     }
 
@@ -144,6 +168,36 @@ abstract class View extends Group {
 
     removeEventListener(name: string, callback: (e: any) => void) {
         this.off(name, callback);
+    }
+
+    private dispatchEvent(name: string, extra: PointLike) {
+        const srcEle = extra.srcElement;
+        // console.log(srcEle, name);
+        const srcEleOwner = [];
+        let parent: Group | null = srcEle;
+        while (parent) {
+            srcEleOwner.push(parent);
+            parent = parent.parent
+        }
+
+        const canvasEvent: CanvasEvent = {
+            ...extra,
+            eventName: name,
+            srcElement: srcEle,
+            stopPropagation: () => {
+                eventVm.get(canvasEvent)!.stopped = true;
+            }
+        }
+
+        eventVm.set(canvasEvent, {stopped: false})
+
+        for (let i = 0; i < srcEleOwner.length - 1; i++) {
+            const owner = srcEleOwner[i];
+            if (eventVm.get(canvasEvent)!.stopped) {
+                break;
+            }
+            owner.trigger(name, canvasEvent)
+        }
     }
 
     getPointView(point: Point): Group | null {
