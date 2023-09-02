@@ -1,19 +1,13 @@
 import Group from "./group";
 import {matrixToRotation, matrixToTranslation} from "../dom";
-import type {Rotation, Translation, RectangleLike} from "../interface";
+import type {Rotation, Translation, RectangleLike, EventName, CanvasEvent} from "../interface";
 import {Point, PointLike} from "../interface";
 import CanvasManager from "../canvas";
+import {Drag, DragEnd, DragStart} from "../const";
 
 type PrivateScope = {
     vp?: CanvasManager
     matrix: DOMMatrix
-}
-
-interface CanvasEvent extends Point {
-    srcElement: Group | null;
-    eventName: string;
-
-    stopPropagation(): void
 }
 
 const eventVm = new WeakMap<CanvasEvent, { stopped: boolean }>()
@@ -35,7 +29,7 @@ abstract class View extends Group {
         this.on('dragStartCapture', (e: { x: number, y: number, srcElement: View | null; }) => {
             active = e.srcElement;
             if (active === this) {
-                this.dispatchEvent('dragStart', e)
+                this.dispatchEvent(DragStart, e)
             }
         })
         this.on('dragCapture', (
@@ -45,7 +39,7 @@ abstract class View extends Group {
                 const scale = this.vp.getScale();
                 const ratio = this.vp.ratio;
                 this?.translateBy(dx * ratio / scale.sx, dy * ratio / scale.sy)
-                this.dispatchEvent('drag', {x, y, srcElement: active})
+                this.dispatchEvent(Drag, {x, y, srcElement: active})
             }
         })
         this.on('dragEndCapture', (
@@ -55,7 +49,7 @@ abstract class View extends Group {
                 const scale = this.vp.getScale();
                 const ratio = this.vp.ratio;
                 this?.translateBy(dx * ratio / scale.sx, dy * ratio / scale.sy)
-                this.dispatchEvent('dragEnd', {x, y, srcElement: active})
+                this.dispatchEvent(DragEnd, {x, y, srcElement: active})
             }
         })
     }
@@ -162,15 +156,15 @@ abstract class View extends Group {
         return this.translate(tx, ty)
     }
 
-    addEventListener(name: string, callback: (e: any) => void) {
+    addEventListener(name: EventName, callback: (e: CanvasEvent) => void) {
         this.on(name, callback);
     }
 
-    removeEventListener(name: string, callback: (e: any) => void) {
+    removeEventListener(name: EventName, callback: (e: CanvasEvent) => void) {
         this.off(name, callback);
     }
 
-    private dispatchEvent(name: string, extra: PointLike) {
+    public dispatchEvent(name: EventName, extra: PointLike) {
         const srcEle = extra.srcElement;
         // console.log(srcEle, name);
         const srcEleOwner = [];

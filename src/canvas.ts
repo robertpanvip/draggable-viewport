@@ -3,10 +3,12 @@ import Viewport from "./viewport";
 import {getComputedStyle} from './dom'
 import Group from "./shape/group";
 import View from "./shape/view";
+import {Click, ContextMenu, DblClick, MouseEnter, MouseLeave, MouseMove} from "./const";
 
 type PrivateScope = {
     matrix: DOMMatrix;
-    setCursorTask: number
+    setCursorTask: number;
+    preSrcElement: Group | null
 }
 
 interface CanvasEvent extends Point {
@@ -42,7 +44,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
             maxScale,
             panning,
         })
-        vm.set(this, {matrix: new DOMMatrix(), setCursorTask: 0})
+        vm.set(this, {matrix: new DOMMatrix(), setCursorTask: 0, preSrcElement: null})
         this.canvas = viewport;
         this.ctx = viewport.getContext('2d');
         const ratio = window.devicePixelRatio || 1;
@@ -141,7 +143,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
     };
 
     private dispatchEvent(name: string, mouse: PointLike) {
-        const srcEle = this.group.getSrcElement(mouse);
+        const srcEle = mouse.srcElement;
         // console.log(srcEle, name);
         const srcEleOwner = [];
         let parent: Group | null = srcEle;
@@ -208,6 +210,22 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         vm.get(this)!.setCursorTask = requestAnimationFrame(() => {
             const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
             const srcEle = this.group.getSrcElement(mouse);
+            const preSrcElement = vm.get(this)!.preSrcElement;
+
+            if (srcEle !== preSrcElement) {
+                if (srcEle && srcEle.isView()) {
+                    srcEle?.dispatchEvent(MouseEnter, {...mouse, srcElement: srcEle})
+                }
+            }
+            this.dispatchEvent(MouseMove, {...mouse, srcElement: srcEle})
+
+            if (srcEle !== preSrcElement) {
+                if (preSrcElement && preSrcElement.isView()) {
+                    preSrcElement?.dispatchEvent(MouseLeave, {...mouse, srcElement: preSrcElement})
+                }
+            }
+            vm.get(this)!.preSrcElement = srcEle;
+
             if (srcEle && srcEle.isView()) {
                 const cursor = srcEle.style.cursor || ""
                 if (this.root.style.cursor != cursor) {
@@ -263,6 +281,30 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         document.removeEventListener("dragend", this.onMouseUp);
     };
 
+    private onClick = (event: MouseEvent) => {
+        const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
+        const srcEle = this.group.getSrcElement(mouse);
+        if (srcEle && srcEle.isView()) {
+            srcEle?.dispatchEvent(Click, {...mouse, srcElement: srcEle})
+        }
+    }
+
+    private onDblClick = (event: MouseEvent) => {
+        const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
+        const srcEle = this.group.getSrcElement(mouse);
+        if (srcEle && srcEle.isView()) {
+            srcEle?.dispatchEvent(DblClick, {...mouse, srcElement: srcEle})
+        }
+    }
+
+    private onContextMenu = (event: MouseEvent) => {
+        const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
+        const srcEle = this.group.getSrcElement(mouse);
+        if (srcEle && srcEle.isView()) {
+            srcEle?.dispatchEvent(ContextMenu, {...mouse, srcElement: srcEle})
+        }
+    }
+
     /**
      * 开始监听
      */
@@ -273,6 +315,9 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         // 监听鼠标移动事件
         this.root.addEventListener("mousemove", this.onMouseMove);
         this.root.addEventListener("drag", this.onMouseMove);
+        this.root.addEventListener("click", this.onClick);
+        this.root.addEventListener("dblclick", this.onDblClick);
+        this.root.addEventListener("contextmenu", this.onContextMenu);
     };
 
     /**
@@ -285,5 +330,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         // 监听鼠标移动事件
         this.root.removeEventListener("mousemove", this.onMouseMove);
         this.root.removeEventListener("drag", this.onMouseMove);
+        this.root.removeEventListener("click", this.onClick);
+        this.root.removeEventListener("dblclick", this.onDblClick);
+        this.root.removeEventListener("contextmenu", this.onContextMenu);
     };
 }

@@ -41,13 +41,38 @@ export default function App() {
             const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
             rect1.name = 'rect1'
             rect1.addEventListener('dragStart',(e)=>{
-                console.log('dragStart1',e)
+                console.log('dragStart1')
 
             })
             const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
             rect2.addEventListener('dragStart',(e)=>{
-                console.log('dragStart2',e)
+                console.log('dragStart2')
                 e.stopPropagation();
+            })
+
+            rect2.addEventListener('drag',(e)=>{
+                console.log('drag')
+                e.stopPropagation();
+            })
+            rect2.addEventListener('dragEnd',(e)=>{
+                console.log('dragEnd')
+                e.stopPropagation();
+            })
+            rect2.addEventListener('click',(e)=>{
+                console.log('click')
+                e.stopPropagation();
+            })
+            rect2.addEventListener('mouseMove',(e)=>{
+                console.log('mouseMove',e)
+                //e.stopPropagation();
+            })
+            rect2.addEventListener('mouseEnter',(e)=>{
+                console.log('mouseEnter',e)
+                //e.stopPropagation();
+            })
+            rect2.addEventListener('mouseLeave',(e)=>{
+                console.log('mouseLeave',e)
+                //e.stopPropagation();
             })
             rect2.style.background = 'red'
             rect2.style.borderRadius = 100
