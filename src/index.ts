@@ -1,4 +1,8 @@
 export {default as SVGManager} from './svg'
 export {default as CanvasManager} from './canvas'
 export {default as DraggableViewport} from './viewport'
+export {default as Rect} from './shape/rect'
+export {default as Text} from './shape/text'
+export {default as View} from './shape/view'
+export {default as Group} from './shape/group'
 export * from './interface'
