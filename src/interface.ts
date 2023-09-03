@@ -54,6 +54,8 @@ export interface SVGManagerOptions extends Options {
 
 export interface CanvasManagerOptions extends Options {
     viewport: HTMLCanvasElement;
+    grid?: boolean,
+    axis?: boolean
 }
 
 export interface RectangleLike {

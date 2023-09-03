@@ -147,6 +147,7 @@ class Group extends Events {
 
         const loop = (ele: Group): boolean => {
             const contains = ele.isPointContains(point);
+
             if (contains) {
                 srcEle = ele;
                 return true;
@@ -154,6 +155,7 @@ class Group extends Events {
 
             const children = ele.getChildren();
             for (const child of children) {
+
                 const found = loop(child);
                 if (found) {
                     return true;
@@ -162,7 +164,6 @@ class Group extends Events {
 
             return false;
         };
-
         loop(this!);
         return srcEle;
     }

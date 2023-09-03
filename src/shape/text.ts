@@ -162,61 +162,37 @@ class Text extends View {
         this.calcTexts.forEach((text, index) => {
             ctx!.fillText(text, this.x, this.y + h * index + this.style.linePadding! * (index * 2 + 1))
         })
-
-        /*if (this.maxWidth) {
-            ctx!.beginPath();
-            ctx!.roundRect(this.x, this.y, this.maxWidth, this.getBBox().height, 0);
-            ctx!.stroke();
-        }*/
-        // 渲染多边形
-       /* ctx.beginPath();
-        this.getSamplePoint().forEach((vertex, index) => {
-            if (index === 0) {
-                ctx.moveTo(vertex.x, vertex.y);
-            } else {
-                ctx.lineTo(vertex.x, vertex.y);
-            }
-        });
-        ctx.closePath();
-        ctx.fillStyle = 'red';
-        ctx.fill();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.stroke();*/
-
+        if (this.drawBBox) {
+            this.renderBBox()
+        }
+        this.renderShape()
         ctx?.restore();
         super.render();
     }
 
-    /**计算两点之间的极角*/
-    calcAngle(p1: Point, p2: Point) {
-        return Math.atan2(p2.y - p1.y, p2.x - p1.x)
-    }
-
-    sortMaxArea(points: Point[]) {
-        const start_point = points.reduce((min, p) => p.x < min.x ? p : min)
-        const sorted_points: Point[] = [start_point]
-        points.splice(points.indexOf(start_point), 1)
-        points.sort((p1, p2) => this.calcAngle(start_point, p1) - this.calcAngle(start_point, p2))
-        sorted_points.push(...points)
-        return sorted_points
-    }
-
-    getSamplePoint() {
+    getShape(): Path2D[] {
         const h = measureHeight(this.style.font!)
-        const points = this.calcTexts.flatMap((item, index) => {
-            const _h = (h + this.style.linePadding! * 2)
-            const w = measureWidth(item, this.style.font!)
-            return this.samplePointsOnRoundRect(this.x, this.y + _h * index, w, _h, 0, 1)
-        });
-        return this.sortMaxArea(points)
-    }
-
-
-    isPointContains({x, y}: Point): boolean {
-        const points = this.getSamplePoint().map(point => this.getRenderMatrix().transformPoint(point));
-        return this.isPointInPolygon(x, y, points)
-    }
+        const {x, y} = this;
+        return this.calcTexts.flatMap((item, index) => {
+            const height = (h + this.style.linePadding! * 2);
+            const width = measureWidth(item, this.style.font!)
+            const path = new Path2D();
+            const cornerRadius = 0;
+            const _y = y + height * index;
+            // 从左上角开始绘制矩形路径
+            path.moveTo(x + cornerRadius, _y);
+            path.lineTo(x + width - cornerRadius, _y);
+            path.arcTo(x + width, _y, x + width, _y + cornerRadius, cornerRadius);
+            path.lineTo(x + width, _y + height - cornerRadius);
+            path.arcTo(x + width, _y + height, x + width - cornerRadius, _y + height, cornerRadius);
+            path.lineTo(x + cornerRadius, _y + height);
+            path.arcTo(x, _y + height, x, _y + height - cornerRadius, cornerRadius);
+            path.lineTo(x, _y + cornerRadius);
+            path.arcTo(x, _y, x + cornerRadius, _y, cornerRadius);
+            path.closePath();
+            return path
+        })
+    };
 }
 
 export default Text

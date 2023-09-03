@@ -30,6 +30,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
     readonly ratio: number = 1;
     readonly group: Group;
     private active: Group | null = null;
+    public grid: boolean = false
+    public axis: boolean = false
 
     constructor({
                     viewport,
@@ -37,6 +39,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
                     minScale,
                     maxScale,
                     panning = true,
+                    grid = false,
+                    axis = false
                 }: CanvasManagerOptions) {
         super({
             scaling,
@@ -47,6 +51,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         vm.set(this, {matrix: new DOMMatrix(), setCursorTask: 0, preSrcElement: null})
         this.canvas = viewport;
         this.ctx = viewport.getContext('2d');
+        this.grid = grid;
+        this.axis = axis;
         const ratio = window.devicePixelRatio || 1;
         this.ratio = ratio;
         const {width, height} = getComputedStyle(viewport)
@@ -76,9 +82,66 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         return this.getSize()
     }
 
+    drawGrid() {
+        const ctx = this.ctx!;
+        ctx.save();
+        // 1. 设置网格大小
+        const girdSize = 10;
+
+        // 2. 获取Canvas的width、height
+        const CanvasWidth = ctx.canvas.width;
+        const CanvasHeight = ctx.canvas.height;
+
+        // 3. 采用遍历的方式，绘画x轴的线条
+        const xLineTotals = Math.floor(CanvasHeight / girdSize); // 计算需要绘画的x轴条数
+        for (let i = 0; i < xLineTotals; i++) {
+            ctx.beginPath(); // 开启路径，设置不同的样式
+            ctx.moveTo(0, girdSize * i - 0.5); // -0.5是为了解决像素模糊问题
+            ctx.lineTo(CanvasWidth, girdSize * i - 0.5);
+            ctx.strokeStyle = "#ccc"; // 设置每个线条的颜色
+            ctx.stroke();
+        }
+
+        // 4.采用遍历的方式，绘画y轴的线条
+        const yLineTotals = Math.floor(CanvasWidth / girdSize); // 计算需要绘画y轴的条数
+        for (let j = 0; j < yLineTotals; j++) {
+            ctx.beginPath(); // 开启路径，设置不同的样式
+            ctx.moveTo(girdSize * j, 0);
+            ctx.lineTo(girdSize * j, CanvasHeight);
+            ctx.strokeStyle = "#ccc"; // 设置每个线条的颜色
+            ctx.stroke();
+        }
+        ctx.restore()
+    }
+
+    drawAxis() {
+        const ctx = this.ctx!;
+        ctx.save();
+        ctx!.setTransform(this.getMatrix());
+        // 2. 获取Canvas的width、height
+        const CanvasWidth = ctx.canvas.width;
+        const CanvasHeight = ctx.canvas.height;
+        ctx.beginPath();
+        ctx.moveTo(0, -CanvasHeight);
+        ctx.lineTo(0, CanvasHeight);
+        ctx.strokeStyle = "red"; // 设置每个线条的颜色
+        ctx.stroke();
+        ctx.moveTo(-CanvasWidth, 0);
+        ctx.lineTo(CanvasWidth, 0);
+        ctx.strokeStyle = "red"; // 设置每个线条的颜色
+        ctx.stroke();
+        ctx.restore()
+    }
+
     render() {
         if (this.canvas) {
             this.canvas!.width = this.canvas!.width
+        }
+        if (this.grid) {
+            this.drawGrid();
+        }
+        if (this.axis) {
+            this.drawAxis()
         }
         this.group?.getChildren().forEach(child => {
             this.ctx?.setTransform(this.getMatrix())
@@ -98,7 +161,6 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
 
     addView(view: View) {
         this.group?.addChild(view)
-        console.log('broadcast');
         this.broadcast('view:added', this)
         this.render();
         return this;
@@ -182,10 +244,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
             this.clientX = event.clientX;
             this.clientY = event.clientY;
             const mouse = this.clientToGraph({x: event.clientX, y: event.clientY})
-            // this.active = this.group?.getChildGroupByPoint(mouse) || null;
             const srcEle = this.group.getSrcElement(mouse);
             this.active = srcEle;
-            //this.dispatchSrcElementEvent('dragStart', mouse)
             this.broadcast('dragStartCapture', {srcElement: srcEle, ...mouse})
 
             if (srcEle) {
@@ -209,7 +269,9 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         cancelAnimationFrame(vm.get(this)!.setCursorTask)
         vm.get(this)!.setCursorTask = requestAnimationFrame(() => {
             const mouse = this.clientToGraph({x: event.clientX, y: event.clientY});
+            //console.time('getSrcElement')
             const srcEle = this.group.getSrcElement(mouse);
+            //console.timeEnd('getSrcElement')
             const preSrcElement = vm.get(this)!.preSrcElement;
 
             if (srcEle !== preSrcElement) {

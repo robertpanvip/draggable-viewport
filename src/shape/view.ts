@@ -1,6 +1,6 @@
 import Group from "./group";
 import {matrixToRotation, matrixToTranslation} from "../dom";
-import type {Rotation, Translation, RectangleLike, EventName, CanvasEvent} from "../interface";
+import type {CanvasEvent, EventName, RectangleLike, Rotation, Translation} from "../interface";
 import {Point, PointLike} from "../interface";
 import CanvasManager from "../canvas";
 import {Drag, DragEnd, DragStart} from "../const";
@@ -18,6 +18,12 @@ abstract class View extends Group {
     abstract style: {
         cursor?: string
     }
+    abstract x: number
+    abstract y: number
+    abstract name: string;
+
+    public drawBBox: boolean = false
+    public drawShape: boolean = false
 
     constructor() {
         super();
@@ -78,6 +84,15 @@ abstract class View extends Group {
         this.setMatrix(matrix)
     }
 
+    getRenderMatrix() {
+        return this.getGroupMatrix()
+    }
+
+    transformPoint(point: Point) {
+        return this.getRenderMatrix().transformPoint(point)
+    }
+
+
     /**表示获取某种变换的矩阵**/
     getMatrix() {
         const scope = vm.get(this)!
@@ -93,7 +108,7 @@ abstract class View extends Group {
 
     getGroupMatrix() {
 
-
+        //return  this.matrix
         return this.vp.getMatrix().multiply(this.matrix)
 
 
@@ -110,7 +125,60 @@ abstract class View extends Group {
         return matrixToTranslation(this.getMatrix())
     };
 
-    abstract getBBox(): RectangleLike
+    abstract getBBox(): RectangleLike;
+
+    renderBBox() {
+        this.ctx?.save()
+        this.ctx!.setTransform(this.getRenderMatrix());
+        const path = new Path2D();
+        this.getBBoxPoints().forEach((vertex, index) => {
+            if (index === 0) {
+                path.moveTo(vertex.x, vertex.y);
+            } else {
+                path.lineTo(vertex.x, vertex.y);
+            }
+        })
+        path.closePath();
+        this.ctx!.strokeStyle = 'blue'
+        this.ctx?.stroke(path);
+        this.ctx?.restore();
+    }
+
+    renderShape({strokeStyle, fillStyle, strokeWidth}
+                    : { strokeStyle?: string | CanvasGradient | CanvasPattern, fillStyle?: string | CanvasGradient | CanvasPattern, strokeWidth?: number }
+                    = {strokeStyle: 'black'}
+    ) {
+        this.ctx?.save();
+        this.ctx?.resetTransform();
+        this.ctx!.setTransform(this.getRenderMatrix());
+        const paths = this.getShape();
+        this.ctx!.strokeStyle = strokeStyle || "transparent";
+        if (strokeWidth !== undefined) {
+            this.ctx!.lineWidth = strokeWidth
+        }
+        if (fillStyle) {
+            this.ctx!.fillStyle = fillStyle;
+        }
+
+        paths.forEach((path, index) => {
+            this.ctx?.stroke(path);
+            if (fillStyle) {
+                this.ctx!.fill(path);
+            }
+        })
+
+        this.ctx?.restore();
+    }
+
+    getBBoxPoints(): Point[] {
+        const bbox = this.getBBox();
+        return [
+            {x: bbox.x, y: bbox.y},
+            {x: bbox.x, y: bbox.y + bbox.height},
+            {x: bbox.x + bbox.width, y: bbox.y + bbox.height},
+            {x: bbox.x + bbox.width, y: bbox.y},
+        ]
+    }
 
     /**旋转方法**/
     rotate(): Rotation
@@ -142,7 +210,7 @@ abstract class View extends Group {
         if (typeof tx === 'undefined' || typeof ty === 'undefined') {
             return this.getTranslation()
         }
-        const matrix = this.getMatrix();
+        let matrix = this.getMatrix();
         matrix.e = tx || 0;
         matrix.f = ty || 0;
         this.setMatrix(matrix);
@@ -194,29 +262,12 @@ abstract class View extends Group {
         }
     }
 
-    getPointView(point: Point): Group | null {
-        if (this.isPointContains(point)) {
-            return this
-        }
-        return super.getChildGroupByPoint(point)
-    }
+    /**获取路径*/
+    abstract getShape(): Path2D[];
 
-    isPointInPolygon(x: number, y: number, points: { x: number, y: number }[]): boolean {
-        /*let isInside = false;
-
-        const numPoints = points.length;
-        let j = numPoints - 1;
-
-        for (let i = 0; i < numPoints; i++) {
-            if ((points[i].y < y && points[j].y >= y) || (points[j].y < y && points[i].y >= y)) {
-                if (points[i].x + (y - points[i].y) / (points[j].y - points[i].y) * (points[j].x - points[i].x) < x) {
-                    isInside = !isInside;
-                }
-            }
-            j = i;
-        }
-
-        return isInside;*/
+    isPointInBBox(x: number, y: number): boolean {
+        const points = this.getBBoxPoints();
+        this.ctx?.save()
         const path = new Path2D();
         points.forEach((vertex, index) => {
             if (index === 0) {
@@ -226,7 +277,37 @@ abstract class View extends Group {
             }
         })
         path.closePath();
-        return this.ctx!.isPointInPath(path, x, y)
+        this.ctx?.resetTransform();
+        this.ctx?.setTransform(this.getGroupMatrix())
+        const inPath = this.ctx!.isPointInPath(path, x, y)
+        this.ctx?.restore()
+        return inPath
+    }
+
+    isPointInPath({x, y}: Point, inStroke: boolean = false): boolean {
+        this.ctx?.save()
+        this.ctx?.resetTransform();
+        this.ctx?.setTransform(this.getGroupMatrix())
+        const inPath = this.getShape().some(shape => {
+            if (inStroke) {
+                return this.ctx!.isPointInStroke(shape, x, y) || this.ctx!.isPointInPath(shape, x, y)
+            }
+            return this.ctx!.isPointInPath(shape, x, y)
+        });
+        this.ctx?.restore()
+        return inPath
+    }
+
+    isPointContains({x, y}: Point, inStroke: boolean = true): boolean {
+        //先判断是否在包围盒里节省性能
+        const inBBox = this.isPointInBBox(x, y)
+        //console.log('inBBox', inBBox);
+        if (!inBBox) {
+            return false
+        }
+        const inPath = this.isPointInPath({x, y}, inStroke)
+        //console.log('inPath', inPath);
+        return inPath
     }
 
     /**抽样点*/

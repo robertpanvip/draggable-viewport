@@ -3,6 +3,7 @@ import SvgManager from "../../src/svg"
 import CanvasManager from "../../src/canvas";
 import Rect from "../../src/shape/rect";
 import Text from "../../src/shape/text";
+import Line from "../../src/shape/line";
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -37,41 +38,45 @@ export default function App() {
                 viewport: canvasRef.current!,
                 minScale: 0.2,
                 maxScale: 8,
+                grid: true,
+                axis: true
             })
+            canvas.translate(100, 100)
             const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
             rect1.name = 'rect1'
-            rect1.addEventListener('dragStart',(e)=>{
-                console.log('dragStart1')
+            rect1.style.borderRadius = 20
+            rect1.addEventListener('dragStart', (e) => {
+                //console.log('dragStart1')
 
             })
             const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
-            rect2.addEventListener('dragStart',(e)=>{
-                console.log('dragStart2')
+            rect2.addEventListener('dragStart', (e) => {
+                //console.log('dragStart2')
                 e.stopPropagation();
             })
 
-            rect2.addEventListener('drag',(e)=>{
-                console.log('drag')
+            rect2.addEventListener('drag', (e) => {
+                //console.log('drag')
                 e.stopPropagation();
             })
-            rect2.addEventListener('dragEnd',(e)=>{
-                console.log('dragEnd')
+            rect2.addEventListener('dragEnd', (e) => {
+                //console.log('dragEnd')
                 e.stopPropagation();
             })
-            rect2.addEventListener('click',(e)=>{
-                console.log('click')
+            rect2.addEventListener('click', (e) => {
+                //console.log('click')
                 e.stopPropagation();
             })
-            rect2.addEventListener('mouseMove',(e)=>{
-                console.log('mouseMove',e)
+            rect2.addEventListener('mouseMove', (e) => {
+                //console.log('mouseMove',e)
                 //e.stopPropagation();
             })
-            rect2.addEventListener('mouseEnter',(e)=>{
-                console.log('mouseEnter',e)
+            rect2.addEventListener('mouseEnter', (e) => {
+                //console.log('mouseEnter',e)
                 //e.stopPropagation();
             })
-            rect2.addEventListener('mouseLeave',(e)=>{
-                console.log('mouseLeave',e)
+            rect2.addEventListener('mouseLeave', (e) => {
+                //console.log('mouseLeave',e)
                 //e.stopPropagation();
             })
             rect2.style.background = 'red'
@@ -82,15 +87,22 @@ export default function App() {
             //console.log(rect1, rect2);
             rect1.addChild(rect2)
             canvas.addView(rect1)
+            //rect1.translate(50, 50)
             //canvas.addView(rect2)
-            console.log(rect1.getGroupMatrix());
             const text = new Text();
-            text.text = '这是测试文字'
+            text.x = 250
+            text.y = 250;
+            text.drawBBox = true;
+            text.text = '这是测试文字安徽省士大夫士大夫'
             //text.style.wrap = 'nowrap';
             text.style.color = 'red';
             text.style.cursor = 'pointer';
-            text.maxWidth = 120
+            text.maxWidth = 120;
             canvas.addView(text)
+            const line = new Line({x1: 0, y1: 0, x2: 150, y2: 150, strokeWidth: 20});
+            line.drawBBox = true;
+            canvas.addView(line)
+            //text.rotate(90)
             canvas.startListening()
         }
 

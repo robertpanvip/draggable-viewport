@@ -60,10 +60,6 @@ class Rect extends View {
         return {x: this.x, y: this.y, width: this.w, height: this.h}
     }
 
-    getRenderMatrix() {
-        return this.getGroupMatrix()
-    }
-
     render() {
         super.render();
         const ctx = this.ctx;
@@ -76,6 +72,10 @@ class Rect extends View {
         ctx!.roundRect(this.x, this.y, this.w, this.h, this.style!.borderRadius);
         ctx!.stroke();
         ctx?.fill();
+        if (this.drawBBox) {
+            this.renderBBox();
+        }
+
         ctx?.restore();
         /*const leftTop = this.matrix.transformPoint({x: this.x, y: this.y})
         const bottomRight = this.matrix.transformPoint({x: this.x + this.w, y: this.y + this.h})
@@ -84,13 +84,29 @@ class Rect extends View {
         ctx!.strokeStyle = 'red'
         ctx!.strokeRect(leftTop.x, leftTop.y, w, h);*/
 
+
     }
 
-    isPointContains({x, y}: Point): boolean {
-        const samplePoints = this.samplePointsOnRoundRect(this.x, this.y, this.w, this.h, this.style.borderRadius || 1, (this.w + this.h) * 2)
-        const points = samplePoints.map(point => this.getRenderMatrix().transformPoint(point));
-        return this.isPointInPolygon(x, y, points)
-    }
+
+    getShape(): Path2D[] {
+        const path = new Path2D();
+        const {x, y} = this;
+        const width = this.w;
+        const height = this.h;
+        const cornerRadius = this.style.borderRadius || 0;
+        // 从左上角开始绘制矩形路径
+        path.moveTo(x + cornerRadius, y);
+        path.lineTo(x + width - cornerRadius, y);
+        path.arcTo(x + width, y, x + width, y + cornerRadius, cornerRadius);
+        path.lineTo(x + width, y + height - cornerRadius);
+        path.arcTo(x + width, y + height, x + width - cornerRadius, y + height, cornerRadius);
+        path.lineTo(x + cornerRadius, y + height);
+        path.arcTo(x, y + height, x, y + height - cornerRadius, cornerRadius);
+        path.lineTo(x, y + cornerRadius);
+        path.arcTo(x, y, x + cornerRadius, y, cornerRadius);
+        path.closePath();
+        return [path]
+    };
 }
 
 export default Rect
