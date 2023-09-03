@@ -4,6 +4,8 @@ import CanvasManager from "../../src/canvas";
 import Rect from "../../src/shape/rect";
 import Text from "../../src/shape/text";
 import Line from "../../src/shape/line";
+import Ellipse from "../../src/shape/ellipse";
+import Circle from "../../src/shape/circle";
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -86,7 +88,7 @@ export default function App() {
             //rect2.rotate(90)
             //console.log(rect1, rect2);
             rect1.addChild(rect2)
-            canvas.addView(rect1)
+            //canvas.addView(rect1)
             //rect1.translate(50, 50)
             //canvas.addView(rect2)
             const text = new Text();
@@ -98,10 +100,22 @@ export default function App() {
             text.style.color = 'red';
             text.style.cursor = 'pointer';
             text.maxWidth = 120;
-            canvas.addView(text)
+            //canvas.addView(text)
             const line = new Line({x1: 0, y1: 0, x2: 150, y2: 150, strokeWidth: 20});
             line.drawBBox = true;
-            canvas.addView(line)
+            //canvas.addView(line)
+            const ellipse = new Ellipse({rx: 100, ry: 50, cx: 0, cy: 0, rotation: Math.PI / 4})
+
+            ellipse.drawBBox = true;
+            ellipse.drawShape = true;
+            canvas.addView(ellipse)
+
+            const circle = new Circle({cx: 100, cy: 100, r: 50})
+
+            circle.drawBBox = true;
+            circle.drawShape = true;
+            canvas.addView(circle)
+
             //text.rotate(90)
             canvas.startListening()
         }
