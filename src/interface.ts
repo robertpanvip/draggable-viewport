@@ -83,4 +83,27 @@ export type EventName =
     | typeof MouseLeave
     | typeof DragStart
     | typeof Drag
-    | typeof DragEnd
+    | typeof DragEnd;
+
+export type ViewStyle = {
+    cursor: string;
+
+    fillStyle: string | CanvasGradient | CanvasPattern;
+    strokeStyle: string | CanvasGradient | CanvasPattern,
+
+    lineCap: CanvasLineCap;
+    lineDashOffset: number
+    lineJoin: CanvasLineJoin;
+    lineWidth: number;
+    miterLimit: number;
+
+    filter: string;
+
+    shadowBlur: number;
+    shadowColor: string;
+    shadowOffsetX: number;
+    shadowOffsetY: number;
+
+    globalAlpha: number;
+    globalCompositeOperation: GlobalCompositeOperation;
+}

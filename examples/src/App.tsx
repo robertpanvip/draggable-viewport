@@ -6,6 +6,7 @@ import Text from "../../src/shape/text";
 import Line from "../../src/shape/line";
 import Ellipse from "../../src/shape/ellipse";
 import Circle from "../../src/shape/circle";
+import Path from "../../src/shape/path";
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -108,15 +109,44 @@ export default function App() {
 
             ellipse.drawBBox = true;
             ellipse.drawShape = true;
-            canvas.addView(ellipse)
+            //canvas.addView(ellipse)
 
             const circle = new Circle({cx: 100, cy: 100, r: 50})
 
             circle.drawBBox = true;
             circle.drawShape = true;
-            canvas.addView(circle)
+           // canvas.addView(circle)
+            const ad1=`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`
+            const ad2=`M 10,10 h 10
+       m  0,10 h 10
+       m  0,10 h 10
+       M 40,20 h 10
+       m  0,10 h 10
+       m  0,10 h 10
+       m  0,10 h 10
+       M 50,50 h 10
+       m-20,10 h 10
+       m-20,10 h 10
+       m-20,10 h 10`
+            const ad3=`M 10,10
+           L 90,90
+           V 10
+           H 50`
+            const ad4=`M 10,90
+           C 30,90 25,10 50,10
+           S 70,90 90,90`
+            const ad5=`M 10,50
+           Q 25,25 40,50
+           t 30,0 30,0 30,0 30,0 30,0`
+            console.log(ad1);
+            const path = new Path({
+                d: ad1
+            })
+            //path.style.strokeStyle='red'
+            path.drawBBox = true;
+            path.drawShape = true;
+            canvas.addView(path)
 
-            //text.rotate(90)
             canvas.startListening()
         }
 

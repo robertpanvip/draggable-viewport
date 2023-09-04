@@ -1,4 +1,3 @@
-import {Point} from "../interface";
 import View from "./view";
 
 type TextStyle = {

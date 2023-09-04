@@ -1,6 +1,6 @@
 import Group from "./group";
 import {matrixToRotation, matrixToTranslation} from "../dom";
-import type {CanvasEvent, EventName, RectangleLike, Rotation, Translation} from "../interface";
+import type {CanvasEvent, EventName, RectangleLike, Rotation, Translation, ViewStyle} from "../interface";
 import {Point, PointLike} from "../interface";
 import CanvasManager from "../canvas";
 import {Drag, DragEnd, DragStart} from "../const";
@@ -11,16 +11,15 @@ type PrivateScope = {
 }
 
 const eventVm = new WeakMap<CanvasEvent, { stopped: boolean }>()
+
 const vm = new WeakMap<View, PrivateScope>()
 
 abstract class View extends Group {
 
-    abstract style: {
-        cursor?: string
-    }
-    abstract x: number
-    abstract y: number
-    abstract name: string;
+    public style: Partial<ViewStyle> = {}
+    public x: number = 0
+    public y: number = 0
+    public name: string = "";
 
     public drawBBox: boolean = false
     public drawShape: boolean = false
