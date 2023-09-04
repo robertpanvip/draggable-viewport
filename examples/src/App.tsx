@@ -7,7 +7,8 @@ import Line from "../../src/shape/line";
 import Ellipse from "../../src/shape/ellipse";
 import Circle from "../../src/shape/circle";
 import Path from "../../src/shape/path";
-
+import Svg from "../../src/react/svg";
+import SvgPath from "../../src/react/path";
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
@@ -157,6 +158,9 @@ export default function App() {
 
     return (
         <div>
+            <Svg width={500} height={500}>
+                <SvgPath d={`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`} stroke='red' />
+            </Svg>
             <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>
             <div

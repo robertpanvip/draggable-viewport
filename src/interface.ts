@@ -107,3 +107,15 @@ export type ViewStyle = {
     globalAlpha: number;
     globalCompositeOperation: GlobalCompositeOperation;
 }
+
+export type SvgAttr={
+    fill:string;
+    fillRule:string;
+    stroke:string;
+    strokeDasharray:string;
+    strokeDashoffset:string;
+    strokeLinecap:string;
+    strokeLinejoin:string;
+    strokeMiterlimit:string;
+    strokeWidth:string;
+}

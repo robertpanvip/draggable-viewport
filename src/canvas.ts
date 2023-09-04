@@ -166,10 +166,21 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         return this;
     }
 
+    updateView(view: View) {
+        this.group?.addChild(view)
+        this.broadcast('view:added', this)
+        this.render();
+        return this;
+    }
+
     removeView(view: View) {
         this.group?.removeChild(view);
         this.render();
         return this;
+    }
+
+    containsView(view: View) {
+        return this.group?.contains(view);
     }
 
 
