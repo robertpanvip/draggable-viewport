@@ -89,6 +89,7 @@ export type ViewStyle = {
     cursor: string;
 
     fillStyle: string | CanvasGradient | CanvasPattern;
+    fillRule: CanvasFillRule;
     strokeStyle: string | CanvasGradient | CanvasPattern,
 
     lineCap: CanvasLineCap;
@@ -108,14 +109,16 @@ export type ViewStyle = {
     globalCompositeOperation: GlobalCompositeOperation;
 }
 
-export type SvgAttr={
-    fill:string;
-    fillRule:string;
-    stroke:string;
-    strokeDasharray:string;
-    strokeDashoffset:string;
-    strokeLinecap:string;
-    strokeLinejoin:string;
-    strokeMiterlimit:string;
-    strokeWidth:string;
+export type SvgAttr = {
+    fill: string;
+    fillRule: CanvasFillRule;
+    stroke: string;
+    strokeDasharray: string;
+    strokeDashoffset: string;
+    strokeLinecap: string;
+    strokeLinejoin: string;
+    strokeMiterlimit: string;
+    strokeWidth: string | number;
+    opacity: string | number
+    style: Partial<Omit<SvgAttr, "style">>
 }

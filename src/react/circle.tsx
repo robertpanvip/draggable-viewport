@@ -1,35 +1,41 @@
 import {SvgAttr} from "../interface";
 import {Fragment, createElement, useEffect, useContext, useRef} from "react";
 import type {FC} from "react";
-import ShapePath from '../shape/path'
+import ShapeCircle from '../shape/circle'
 import Context from "./context";
 import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
 
-export interface PathProps extends Partial<SvgAttr> {
-    d: string
+export interface CircleProps extends Partial<SvgAttr> {
+    r: number | string,
+    cx?: number | string,
+    cy?: number | string,
 }
 
-const Path: FC<PathProps> = ({d, ...style}) => {
+const Circle: FC<CircleProps> = ({
+                                     r = 0, cx = 0, cy = 0, ...style
+                                 }) => {
 
     const _styles = getSvgComputedStyle(style)
-
     const {instance} = useContext(Context);
 
-    const ref = useRef<ShapePath>()
+    const ref = useRef<ShapeCircle>()
 
     if (!ref.current) {
-        ref.current = new ShapePath({d})
+        ref.current = new ShapeCircle({
+            cx: parseFloat(`${cx}`),
+            cy: parseFloat(`${cy}`),
+            r: parseFloat(`${r}`),
+        })
         ref.current.style = svgAttrToCanvas(style)
         instance?.addView(ref.current)
     } else {
-        ref.current.d = d;
         ref.current.style = svgAttrToCanvas(style)
     }
 
     useEffect(() => {
         instance?.render();
     }, [
-        d,
+        r, cx, cy,
         _styles.fill,
         _styles.fillRule,
         _styles.stroke,
@@ -49,4 +55,4 @@ const Path: FC<PathProps> = ({d, ...style}) => {
 
     return createElement(Fragment)
 }
-export default Path
+export default Circle

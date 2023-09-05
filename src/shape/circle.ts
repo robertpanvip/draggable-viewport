@@ -23,6 +23,16 @@ class Circle extends Ellipse {
             height: 2 * this.r
         };
     }
+    getShape(): Path2D[] {
+        const cx = this.cx;
+        const cy = this.cy;
+        const startAngle = this.startAngle;
+        const endAngle = this.endAngle;
+        const path = new Path2D();
+        path.arc(cx, cy, this.r, startAngle,endAngle);
+        path.closePath()
+        return [path]
+    }
 }
 
 export default Circle

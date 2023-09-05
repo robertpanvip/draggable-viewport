@@ -9,6 +9,12 @@ import Circle from "../../src/shape/circle";
 import Path from "../../src/shape/path";
 import Svg from "../../src/react/svg";
 import SvgPath from "../../src/react/path";
+import SvgPolygon from "../../src/react/polygon";
+import SvgPolyline from "../../src/react/polyline";
+import SvgRect from "../../src/react/rect"
+import SvgEllipse from "../../src/react/ellipse"
+import SvgCircle from "../../src/react/circle"
+
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
@@ -35,7 +41,7 @@ export default function App() {
          m.startListening()
          m.translateBy(100, 100)*/
 
-        const img = new Image()
+       /* const img = new Image()
         img.src = toImgSrc(svgRef.current!)
         img.onload = () => {
             const canvas = new CanvasManager({
@@ -116,9 +122,9 @@ export default function App() {
 
             circle.drawBBox = true;
             circle.drawShape = true;
-           // canvas.addView(circle)
-            const ad1=`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`
-            const ad2=`M 10,10 h 10
+            // canvas.addView(circle)
+            const ad1 = `M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`
+            const ad2 = `M 10,10 h 10
        m  0,10 h 10
        m  0,10 h 10
        M 40,20 h 10
@@ -129,14 +135,14 @@ export default function App() {
        m-20,10 h 10
        m-20,10 h 10
        m-20,10 h 10`
-            const ad3=`M 10,10
+            const ad3 = `M 10,10
            L 90,90
            V 10
            H 50`
-            const ad4=`M 10,90
+            const ad4 = `M 10,90
            C 30,90 25,10 50,10
            S 70,90 90,90`
-            const ad5=`M 10,50
+            const ad5 = `M 10,50
            Q 25,25 40,50
            t 30,0 30,0 30,0 30,0 30,0`
             console.log(ad1);
@@ -149,17 +155,64 @@ export default function App() {
             canvas.addView(path)
 
             canvas.startListening()
-        }
+        }*/
 
         return () => {
             //m.stopListening()
         }
     }, [])
+    const [d, setD] = React.useState<string>(`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`)
+
+
+    React.useEffect(() => {
+        setTimeout(() => {
+            console.log('setD');
+            setD(`M 10,50
+           Q 25,25 40,50
+           t 30,0 30,0 30,0 30,0 30,0`)
+        }, 5000)
+    }, [])
 
     return (
         <div>
             <Svg width={500} height={500}>
-                <SvgPath d={`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`} stroke='red' />
+                <SvgPath d={d}
+                         stroke='red'/>
+                <SvgPolygon points={'100,10 40,198 190,78 10,78 160,198'}
+                            style={{
+                                fill: 'lime',
+                                stroke: "purple",
+                                strokeWidth: 5,
+                                fillRule: "nonzero",
+                            }}
+                />
+                <SvgPolyline points={'0,40 40,40 40,80 80,80 80,120 120,120 120,160'}
+                             style={{
+                                 stroke: "purple",
+                                 strokeWidth: 5,
+                             }}
+                />
+                <SvgRect
+                    x={200}
+                    y={200}
+                    rx={200}
+                    ry={200}
+                    width={200}
+                    height={200}
+                    style={{
+                        stroke: "purple",
+                        strokeWidth: 5,
+                    }}
+                />
+                <SvgCircle
+                    r={100}
+                    cx={200}
+                    cy={200}
+                    style={{
+                        stroke: "purple",
+                        strokeWidth: 5,
+                    }}
+                />
             </Svg>
             <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>

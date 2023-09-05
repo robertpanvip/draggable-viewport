@@ -1,7 +1,7 @@
 import type {SvgAttr, ViewStyle} from "../interface";
 
 const canvas = document.createElement('canvas')
-const ctx = canvas.getContext('2d')!
+const ctx = canvas.getContext('2d', {willReadFrequently: true})!
 
 export function getPathBounds(path: Path2D) {
     ctx.save();
@@ -49,7 +49,7 @@ export function getPathBounds(path: Path2D) {
 
 const NameMap = {
     fill: 'fillStyle',
-    //fillRule: 'fillRule',
+    fillRule: 'fillRule',
     stroke: 'strokeStyle',
     //strokeDasharray: 'strokeDasharray',
     strokeDashoffset: 'lineDashOffset',
@@ -57,11 +57,21 @@ const NameMap = {
     strokeLinejoin: 'lineJoin',
     strokeMiterlimit: 'miterLimit',
     strokeWidth: 'lineWidth',
+    opacity: "globalAlpha"
 }
 
-export function svgAttrToCanvas(attrs: Partial<SvgAttr>):Partial<ViewStyle> {
-    return Object.fromEntries(Object.entries(attrs).map(([key, value]) => {
+export function svgAttrToCanvas(attrs: Partial<SvgAttr>): Partial<ViewStyle> {
+    const computedStyles = getSvgComputedStyle(attrs)
+    return Object.fromEntries(Object.entries(computedStyles).map(([key, value]) => {
         // @ts-ignore
         return [NameMap[key], value]
     }))
+}
+
+export function getSvgComputedStyle(attrs: Partial<SvgAttr>): Partial<Omit<SvgAttr, "style">> {
+    const {style, ...rest} = attrs;
+    return {
+        ...style,
+        ...rest
+    }
 }

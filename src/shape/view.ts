@@ -289,9 +289,9 @@ abstract class View extends Group {
         this.ctx?.setTransform(this.getGroupMatrix())
         const inPath = this.getShape().some(shape => {
             if (inStroke) {
-                return this.ctx!.isPointInStroke(shape, x, y) || this.ctx!.isPointInPath(shape, x, y)
+                return this.ctx!.isPointInStroke(shape, x, y) || this.ctx!.isPointInPath(shape, x, y, this.style.fillRule)
             }
-            return this.ctx!.isPointInPath(shape, x, y)
+            return this.ctx!.isPointInPath(shape, x, y, this.style.fillRule)
         });
         this.ctx?.restore()
         return inPath

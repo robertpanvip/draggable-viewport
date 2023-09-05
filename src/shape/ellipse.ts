@@ -1,6 +1,6 @@
 import {RectangleLike} from "../interface";
-import View from "./view";
-//cx="240" cy="50" rx="220" ry="30"
+import Path from "./path";
+
 type EllipseConfig = {
     cx: number,
     cy: number,
@@ -11,11 +11,9 @@ type EllipseConfig = {
     endAngle?: number;//椭圆将要绘制的结束点角度，以弧度表示 (非角度度数)。
 }
 
-class Ellipse extends View {
+class Ellipse extends Path {
     name: string = "Ellipse";
-    style: { cursor?: string } = {};
-    x: number = 0;
-    y: number = 0;
+
     public cx: number;//CX属性定义的椭圆中心的x坐标
     public cy: number;
     public rx: number;//RX属性定义的水平半径
@@ -25,7 +23,7 @@ class Ellipse extends View {
     public endAngle: number;//椭圆将要绘制的结束点角度，以弧度表示 (非角度度数)。
 
     constructor({cx, cy, rx, ry, rotation = 0, startAngle = 0, endAngle = 2 * Math.PI}: EllipseConfig) {
-        super();
+        super({d:''});
         this.cx = cx;
         this.cy = cy;
         this.rx = rx;
@@ -70,29 +68,6 @@ class Ellipse extends View {
             width: maxX - minX,
             height: maxY - minY
         };
-    }
-
-    render() {
-        const ctx = this.ctx!;
-        ctx.save()
-        this.ctx!.setTransform(this.getRenderMatrix());
-        ctx.beginPath();
-        ctx.ellipse(this.cx, this.cy, this.rx, this.ry, this.rotation, this.startAngle, this.endAngle)
-        ctx.closePath();
-        ctx.stroke();
-        ctx.restore();
-        if (this.drawShape) {
-            this.renderShape({
-                strokeStyle: 'red'!,
-                //fillStyle: this.style?.color!,
-                strokeWidth: 1!
-            })
-        }
-
-        if (this.drawBBox) {
-            this.renderBBox()
-        }
-        super.render();
     }
 
     getShape(): Path2D[] {

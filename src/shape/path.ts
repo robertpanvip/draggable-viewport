@@ -43,22 +43,28 @@ class Path extends View {
         super.render();
         ctx.save()
         ctx.setTransform(this.getRenderMatrix());
-        const {cursor, ...rest} = this.style || {}
+        const {cursor, fillRule, globalAlpha, ...rest} = this.style || {}
         Object.entries(rest).forEach(([key, val]) => {
             if (val !== undefined && (typeof val !== 'function')) {
                 // @ts-ignore
                 ctx[key as keyof Omit<ViewStyle, 'cursor'>] = val;
             }
         })
+
+        if (globalAlpha != undefined) {
+            ctx.globalAlpha = globalAlpha
+        }
+
+
         const path = this.getShape()[0]
+
+        if (this.style.fillStyle) {
+            ctx.fill(path, fillRule)
+        }
 
         if (this.style.strokeStyle) {
             ctx.stroke(path)
         }
-        if (this.style.fillStyle) {
-            ctx.fill(path)
-        }
-
 
         ctx.restore();
         if (this.drawShape) {
