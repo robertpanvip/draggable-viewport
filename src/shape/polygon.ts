@@ -19,7 +19,6 @@ class Polygon extends Path {
 
     constructor(options: Partial<PolygonOptions> = {points: [], close: true}) {
         const _options = {points: [], close: true, ...options}
-        console.log(_options);
         super({
             d: getPathStrFromPoints(_options.points, _options.close)
         });

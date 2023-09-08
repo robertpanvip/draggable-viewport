@@ -30,7 +30,7 @@ class Group extends Events {
         vm.get(this)!.zIndex = val
     }
 
-    public isView():this is View {
+    public isView(): this is View {
         return false
     }
 
@@ -54,12 +54,8 @@ class Group extends Events {
     }
 
     removeChildAt(index: number) {
-        const child = this.getChildAt(index)
-        const children = this.children
-        if (children != null && child != null) {
-            child.remove()
-        }
-        return child
+        this.children = this.children.splice(index, 1)
+        return this
     }
 
     remove() {

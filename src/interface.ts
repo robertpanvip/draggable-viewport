@@ -122,3 +122,16 @@ export type SvgAttr = {
     opacity: string | number
     style: Partial<Omit<SvgAttr, "style">>
 }
+
+export interface TangentPoint extends Point {
+    angle: number,
+    w: number,
+    word: string,
+    next: Point,
+}
+
+export interface TextLine {
+    words: string,
+    points: TangentPoint[],
+    shape: Path2D
+}

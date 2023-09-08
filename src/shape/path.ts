@@ -31,7 +31,7 @@ class Path extends View {
 
     getBBox(): RectangleLike {
         // 获取Path2D对象的边界框
-        return getPathBounds(vm.get(this)!.path!);
+        return getPathBounds(vm.get(this)!.path!,this.ctx!);
     }
 
     getShape(): Path2D[] {

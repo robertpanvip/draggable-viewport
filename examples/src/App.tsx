@@ -14,6 +14,7 @@ import SvgPolyline from "../../src/react/polyline";
 import SvgRect from "../../src/react/rect"
 import SvgEllipse from "../../src/react/ellipse"
 import SvgCircle from "../../src/react/circle"
+import SvgText from "../../src/react/text"
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -176,7 +177,7 @@ export default function App() {
     return (
         <div>
             <Svg width={500} height={500}>
-                <SvgPath d={d}
+               {/* <SvgPath d={d}
                          stroke='red'/>
                 <SvgPolygon points={'100,10 40,198 190,78 10,78 160,198'}
                             style={{
@@ -212,7 +213,13 @@ export default function App() {
                         stroke: "purple",
                         strokeWidth: 5,
                     }}
-                />
+                />*/}
+                <SvgText x={100} y={100} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
+                    这是我的测试这是我的测试这是我的测试
+                </SvgText>
+                <SvgText x={300} y={300} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
+                    这是我的测试这是我的测试这是我的测试
+                </SvgText>
             </Svg>
             <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>

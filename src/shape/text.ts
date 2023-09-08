@@ -1,4 +1,14 @@
 import View from "./view";
+import {
+    calculateVerticalPoint, genClosePath,
+    getPathBounds, getTotalLength,
+    measureHeight,
+    measureWidth,
+    renderText,
+    svgPathToTangentPoints
+} from "../utils/convert";
+import {Point, TangentPoint} from "../interface";
+import Path from "./path";
 
 type TextStyle = {
     cursor?: string;
@@ -14,7 +24,12 @@ type TextStyle = {
 type TextConfig = {
     x: number,
     y: number,
+    dx?: number;
+    dy?: number;
     text?: string;
+    path?: string;
+    startOffset?: number;
+    spacing?: number;
     style?: TextStyle
 }
 
@@ -27,41 +42,15 @@ const defaultStyle = {
     wrap: 'wrap' as const,
     overflow: 'ellipsis' as const
 }
-const canvas = document.createElement('canvas')
-const fCtx = canvas.getContext('2d')!
 
-function measureWidth(text: string, font: string) {
-    fCtx.font = font;
-    const metrics = fCtx.measureText(text);
-    return metrics.width
+
+interface PrivateScope {
+    closePathPoints: Point[];
+    wordPoints: TangentPoint[]
 }
 
-function measureHeight(font: string) {
-    fCtx.font = font;
-    const metrics = fCtx.measureText('我');
-    return metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent
-}
+const vm = new WeakMap<Text, PrivateScope>()
 
-function renderText(text: string, font: string, maxWidth: number) {
-    const arr = text.split('');
-    let res: string[] = [];
-    let tmp = 0;
-    let tmpWord = '';
-    arr.forEach(word => {
-        const wordWidth = measureWidth(word, font)
-        tmp = tmp + wordWidth;
-        tmpWord = tmpWord + word
-        if (tmp + wordWidth > maxWidth) {
-            res.push(tmpWord);
-            tmp = 0;
-            tmpWord = ''
-        }
-    })
-    if (tmpWord) {
-        res.push(tmpWord);
-    }
-    return res
-}
 
 class Text extends View {
 
@@ -72,26 +61,56 @@ class Text extends View {
     public maxWidth?: number
 
     public text: string = "";
+    public path: string = ""
 
     public style: TextStyle = {...defaultStyle};
+    private dx: number = 0;
+    private dy: number = 0;
+    private spacing: number = 0;
 
     constructor(
         {
             x,
             y,
+            dx,
+            dy,
             text,
+            path,
+            startOffset,
+            spacing,
             style = {...defaultStyle}
         }: TextConfig = {
             x: 0,
             y: 0,
             text: '',
+            path: '',
+            startOffset: 0,
+            spacing: 0,
             style: {...defaultStyle}
         }) {
         super();
         this.x = x;
         this.y = y;
-        this.text = text || ""
-        this.style = style
+        this.text = text || "";
+        this.path = path || '';
+        this.dx = startOffset || dx || 0;
+        this.dy = dy || 0
+        this.spacing = spacing || 0
+        this.style = style;
+        this.maxWidth = this.maxWidth || getTotalLength(this.path)
+        vm.set(this, {
+            closePathPoints: genClosePath(this.path, this.style.font!, this.dy, this.x, this.y),
+            wordPoints: path ? svgPathToTangentPoints({
+                d: path,
+                x: this.x,
+                y: this.y,
+                text: this.text,
+                font: this.style.font || "",
+                dx: this.dx,
+                dy: this.dy,
+                spacing: this.spacing
+            }) : []
+        })
     }
 
     get calcTexts() {
@@ -125,6 +144,9 @@ class Text extends View {
     }
 
     getBBox() {
+        if (this.path) {
+            return getPathBounds(this.getShape()[0],this.ctx!)
+        }
         const h = measureHeight(this.style.font!);
         const sizes = this.calcTexts.map((text, index) => {
             return {
@@ -150,21 +172,48 @@ class Text extends View {
         ctx!.setTransform(this.getRenderMatrix());
         ctx!.fillStyle = this.style?.color!;
         //ctx!.strokeStyle = this.style?.borderColor!;
-
         if (this.style.font) {
             ctx!.font = this.style.font;
             ctx!.textBaseline = this.style.textBaseline!;
             ctx!.textAlign = this.style.textAlign!
         }
-        const h = measureHeight(this.style.font!)
+        if (this.path) {
+            // 绘制围绕路径的文字
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            //ctx.stroke(new Path2D(this.path))
+            const points = vm.get(this)!.wordPoints || []
+            for (let i = 0; i < points.length; i++) {
+                const point = points[i];
+                ctx.save();
+                // 将坐标原点移到路径上的点
+                ctx.translate(point.x, point.y);
+                // 旋转坐标系
+                ctx.rotate(point.angle);
+                // 绘制文字
+                ctx.fillText(point.word, 0, 0);
 
-        this.calcTexts.forEach((text, index) => {
-            ctx!.fillText(text, this.x, this.y + h * index + this.style.linePadding! * (index * 2 + 1))
-        })
-        if (this.drawBBox) {
-            this.renderBBox()
+                ctx.restore();
+            }
+            ctx.restore();
+            if (this.drawBBox) {
+                this.renderBBox()
+            }
+            if (this.drawShape) {
+                this.renderShape()
+            }
+        } else {
+            const h = measureHeight(this.style.font!)
+            this.calcTexts.forEach((text, index) => {
+                ctx!.fillText(text, this.x, this.y + h * index + this.style.linePadding! * (index * 2 + 1))
+            })
+            if (this.drawBBox) {
+                this.renderBBox()
+            }
+            if (this.drawShape) {
+                this.renderShape()
+            }
         }
-        this.renderShape()
         ctx?.restore();
         super.render();
     }
@@ -172,6 +221,20 @@ class Text extends View {
     getShape(): Path2D[] {
         const h = measureHeight(this.style.font!)
         const {x, y} = this;
+        if (this.path) {
+            const closePathPoints = vm.get(this)!.closePathPoints || []
+            const path = new Path2D();
+            for (let i = 0; i < closePathPoints.length; i++) {
+                const point = closePathPoints[i];
+                if (i === 0) {
+                    path.moveTo(point.x, point.y);
+                } else {
+                    path.lineTo(point.x, point.y);
+                }
+            }
+            path.closePath();
+            return [path]
+        }
         return this.calcTexts.flatMap((item, index) => {
             const height = (h + this.style.linePadding! * 2);
             const width = measureWidth(item, this.style.font!)

@@ -386,8 +386,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         this.root.addEventListener("mousedown", this.onMouseDown);
         this.root.addEventListener("wheel", this.onMouseWheel);
         // 监听鼠标移动事件
-        this.root.addEventListener("mousemove", this.onMouseMove);
-        this.root.addEventListener("drag", this.onMouseMove);
+        document.addEventListener("mousemove", this.onMouseMove);
+        document.addEventListener("drag", this.onMouseMove);
         this.root.addEventListener("click", this.onClick);
         this.root.addEventListener("dblclick", this.onDblClick);
         this.root.addEventListener("contextmenu", this.onContextMenu);
@@ -401,8 +401,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         this.root.removeEventListener("mousedown", this.onMouseDown);
         this.root.removeEventListener("wheel", this.onMouseWheel);
         // 监听鼠标移动事件
-        this.root.removeEventListener("mousemove", this.onMouseMove);
-        this.root.removeEventListener("drag", this.onMouseMove);
+        document.removeEventListener("mousemove", this.onMouseMove);
+        document.removeEventListener("drag", this.onMouseMove);
         this.root.removeEventListener("click", this.onClick);
         this.root.removeEventListener("dblclick", this.onDblClick);
         this.root.removeEventListener("contextmenu", this.onContextMenu);
