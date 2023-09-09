@@ -1,10 +1,22 @@
-import React from "react";
-import CanvasManager from "../canvas";
+import {createContext} from "react";
+import View from "../shape/view";
 
 export type ContextConfig = {
-    instance: CanvasManager | null
+    instance: {
+        add(view:View):void
+        update(): void,
+        removeChild(view:View):void
+    }
 }
-const Context = React.createContext<ContextConfig>({
-    instance: null
+
+const Context = createContext<ContextConfig>({
+    instance: {
+        add() {
+        },
+        update() {
+        },
+        removeChild() {
+        }
+    }
 })
 export default Context

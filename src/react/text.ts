@@ -37,13 +37,13 @@ const Text: FC<TextProps> = ({
             spacing
         })
         //ref.current.style = svgAttrToCanvas(style)
-        instance?.addView(ref.current)
+        instance?.add(ref.current)
     } else {
         //ref.current.style = svgAttrToCanvas(style)
     }
 
     useEffect(() => {
-        instance?.render();
+        instance?.update();
     }, [
         x, y, children, path, startOffset, spacing,
         _styles.fill,
@@ -59,7 +59,7 @@ const Text: FC<TextProps> = ({
 
     useEffect(() => {
         return () => {
-            instance?.removeView(ref.current!)
+            instance?.removeChild(ref.current!)
         }
     }, [])
 

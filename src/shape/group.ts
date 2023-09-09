@@ -17,6 +17,7 @@ class Group extends Events {
 
     public visible: boolean = true;
 
+
     constructor() {
         super();
         vm.set(this, {zIndex: 0})
@@ -144,7 +145,7 @@ class Group extends Events {
         const loop = (ele: Group): boolean => {
             const contains = ele.isPointContains(point);
 
-            if (contains) {
+            if (contains && ele.visible) {
                 srcEle = ele;
                 return true;
             }

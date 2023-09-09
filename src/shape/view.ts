@@ -108,15 +108,15 @@ abstract class View extends Group {
     getGroupMatrix() {
 
         //return  this.matrix
-        return this.vp.getMatrix().multiply(this.matrix)
+        //return this.vp.getMatrix().multiply(this.matrix)
+        const ancestors = this.getAncestors()
 
-
-        /*return ancestors.reduce((pre, item) => {
+        return ancestors.reduce((pre, item) => {
             if (item instanceof View) {
                 return pre.multiply(item.matrix)
             }
             return pre.multiply(new DOMMatrix())
-        }, this.vp.getMatrix()).multiply(this.matrix)*/
+        }, this.vp.getMatrix()).multiply(this.matrix)
     }
 
     /**获取位置方法**/

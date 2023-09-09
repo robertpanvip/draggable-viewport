@@ -1,11 +1,10 @@
-import {SvgAttr} from "../interface";
-import {Fragment, createElement, useEffect, useContext, useRef} from "react";
+import {SupportEvents, SvgAttr} from "../interface";
+import {Fragment, createElement} from "react";
 import type {FC} from "react";
 import ShapePolygon from '../shape/polygon'
-import Context from "./context";
-import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
+import {useInstance} from "./hooks";
 
-export interface PolylineProps extends Partial<SvgAttr> {
+export interface PolylineProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     points: string
 }
 
@@ -19,46 +18,40 @@ const formatter = (points: string) => {
     })
 }
 
-const Polyline: FC<PolylineProps> = ({points, ...style}) => {
-
-    const _styles = getSvgComputedStyle(style)
-    const {instance} = useContext(Context);
-
-    const ref = useRef<ShapePolygon>()
-
-    if (!ref.current) {
-        ref.current = new ShapePolygon({
+const Polyline: FC<PolylineProps> = ({
+                                         points,
+                                         onDblClick,
+                                         onClick,
+                                         onContextMenu,
+                                         onMouseMove,
+                                         onMouseEnter,
+                                         onMouseLeave,
+                                         onDragStart,
+                                         onDrag,
+                                         onDragEnd,
+                                         ...style
+                                     }) => {
+    useInstance(
+        style,
+        {
+            onDblClick,
+            onClick,
+            onContextMenu,
+            onMouseMove,
+            onMouseEnter,
+            onMouseLeave,
+            onDragStart,
+            onDrag,
+            onDragEnd,
+        },
+        () => new ShapePolygon({
             points: formatter(points),
-            close:false
-        })
-        ref.current.style = svgAttrToCanvas(style)
-        instance?.addView(ref.current)
-    } else {
-        ref.current.points = formatter(points);
-        ref.current.style = svgAttrToCanvas(style)
-    }
-
-    useEffect(() => {
-        instance?.render();
-    }, [
-        points,
-        _styles.fill,
-        _styles.fillRule,
-        _styles.stroke,
-        _styles.strokeDasharray,
-        _styles.strokeDashoffset,
-        _styles.strokeLinecap,
-        _styles.strokeLinejoin,
-        _styles.strokeMiterlimit,
-        _styles.strokeWidth
-    ])
-
-    useEffect(() => {
-        return () => {
-            instance?.removeView(ref.current!)
-        }
-    }, [])
-
+            close: false
+        }),
+        [
+            points,
+        ]
+    )
     return createElement(Fragment)
 }
 export default Polyline

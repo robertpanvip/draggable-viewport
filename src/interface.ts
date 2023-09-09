@@ -123,15 +123,23 @@ export type SvgAttr = {
     style: Partial<Omit<SvgAttr, "style">>
 }
 
+type CanvasListener = (e: CanvasEvent) => void
+
+export type SupportEvents = {
+    onDblClick: CanvasListener,
+    onClick: CanvasListener,
+    onContextMenu: CanvasListener,
+    onMouseMove: CanvasListener,
+    onMouseEnter: CanvasListener,
+    onMouseLeave: CanvasListener,
+    onDragStart: CanvasListener,
+    onDrag: CanvasListener,
+    onDragEnd: CanvasListener
+};
+
 export interface TangentPoint extends Point {
     angle: number,
     w: number,
     word: string,
     next: Point,
-}
-
-export interface TextLine {
-    words: string,
-    points: TangentPoint[],
-    shape: Path2D
 }

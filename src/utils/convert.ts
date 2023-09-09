@@ -1,4 +1,4 @@
-import type {Point, SvgAttr, TangentPoint, TextLine, ViewStyle} from "../interface";
+import type {Point, SvgAttr, TangentPoint, ViewStyle} from "../interface";
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d', {willReadFrequently: true})!
@@ -281,4 +281,18 @@ export function getSvgComputedStyle(attrs: Partial<SvgAttr>): Partial<Omit<SvgAt
         ...style,
         ...rest
     }
+}
+
+const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+const svgTransform = svgElement.createSVGTransform();
+
+export function parseTransformToMatrix(transform: string): SVGMatrix {
+    svgTransform.setMatrix(svgElement.createSVGMatrix());
+    svgTransform.setMatrix(svgTransform.matrix.translate(0, 0));
+    svgElement.transform.baseVal.initialize(svgTransform);
+    const transformList = svgElement.transform.baseVal;
+    transformList.initialize(svgElement.transform.baseVal.createSVGTransformFromMatrix(svgElement.getScreenCTM()!));
+
+    svgElement.setAttribute("transform", transform);
+    return transformList!.consolidate()!.matrix;
 }

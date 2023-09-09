@@ -1,11 +1,10 @@
-import {SvgAttr} from "../interface";
-import {Fragment, createElement, useEffect, useContext, useRef} from "react";
+import {SupportEvents, SvgAttr} from "../interface";
+import {Fragment, createElement} from "react";
 import type {FC} from "react";
 import ShapeEllipse from '../shape/ellipse'
-import Context from "./context";
-import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
+import {useInstance} from "./hooks";
 
-export interface EllipseProps extends Partial<SvgAttr> {
+export interface EllipseProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     cx: number,
     cy: number,
     rx: number,
@@ -13,47 +12,40 @@ export interface EllipseProps extends Partial<SvgAttr> {
 }
 
 const Ellipse: FC<EllipseProps> = ({
-                                       rx, ry, cx = 0, cy = 0, ...style
+                                       rx, ry, cx = 0, cy = 0,
+                                       onDblClick,
+                                       onClick,
+                                       onContextMenu,
+                                       onMouseMove,
+                                       onMouseEnter,
+                                       onMouseLeave,
+                                       onDragStart,
+                                       onDrag,
+                                       onDragEnd,
+                                       ...style
                                    }) => {
 
-    const _styles = getSvgComputedStyle(style)
-    const {instance} = useContext(Context);
-
-    const ref = useRef<ShapeEllipse>()
-
-    if (!ref.current) {
-        ref.current = new ShapeEllipse({
+    useInstance(
+        style,
+        {
+            onDblClick,
+            onClick,
+            onContextMenu,
+            onMouseMove,
+            onMouseEnter,
+            onMouseLeave,
+            onDragStart,
+            onDrag,
+            onDragEnd,
+        },
+        () => new ShapeEllipse({
             cx: parseFloat(`${cx}`),
             cy: parseFloat(`${cy}`),
             rx: parseFloat(`${rx}`),
             ry: parseFloat(`${ry}`),
-        })
-        ref.current.style = svgAttrToCanvas(style)
-        instance?.addView(ref.current)
-    } else {
-        ref.current.style = svgAttrToCanvas(style)
-    }
-
-    useEffect(() => {
-        instance?.render();
-    }, [
-        rx, ry, cx, cy,
-        _styles.fill,
-        _styles.fillRule,
-        _styles.stroke,
-        _styles.strokeDasharray,
-        _styles.strokeDashoffset,
-        _styles.strokeLinecap,
-        _styles.strokeLinejoin,
-        _styles.strokeMiterlimit,
-        _styles.strokeWidth
-    ])
-
-    useEffect(() => {
-        return () => {
-            instance?.removeView(ref.current!)
-        }
-    }, [])
+        }), [
+            rx, ry, cx, cy,
+        ])
 
     return createElement(Fragment)
 }

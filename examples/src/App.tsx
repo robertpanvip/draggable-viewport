@@ -15,6 +15,7 @@ import SvgRect from "../../src/react/rect"
 import SvgEllipse from "../../src/react/ellipse"
 import SvgCircle from "../../src/react/circle"
 import SvgText from "../../src/react/text"
+import SvgG from "../../src/react/g"
 
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
@@ -176,7 +177,7 @@ export default function App() {
 
     return (
         <div>
-            <Svg width={500} height={500}>
+            <Svg width={1920} height={1080}>
                {/* <SvgPath d={d}
                          stroke='red'/>
                 <SvgPolygon points={'100,10 40,198 190,78 10,78 160,198'}
@@ -214,14 +215,43 @@ export default function App() {
                         strokeWidth: 5,
                     }}
                 />*/}
-                <SvgText x={100} y={100} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
+                {/*<SvgText x={100} y={100} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
                     这是我的测试这是我的测试这是我的测试
                 </SvgText>
                 <SvgText x={300} y={300} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
                     这是我的测试这是我的测试这是我的测试
-                </SvgText>
+                </SvgText>*/}
+                <SvgG transform={'translate(100,100)'}>
+                    <SvgRect
+                        x={200}
+                        y={200}
+                        //rx={200}
+                       //ry={200}
+                        width={200}
+                        height={200}
+                        style={{
+                            stroke: "purple",
+                            strokeWidth: 5,
+                        }}
+                        onMouseMove={(e)=>{
+                            console.log('move',e)
+                        }}
+                    />
+                    <SvgRect
+                        x={100}
+                        y={100}
+                        //rx={200}
+                        //ry={200}
+                        width={100}
+                        height={100}
+                        style={{
+                            stroke: "red",
+                            strokeWidth: 5,
+                        }}
+                    />
+                </SvgG>
             </Svg>
-            <canvas width={500} height={500} ref={canvasRef}
+           {/* <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>
             <div
                 style={
@@ -278,7 +308,7 @@ export default function App() {
                     </g>
                 </svg>
             </div>
-
+*/}
             {/*<div id={'container'} style={{width: 500, height: 500, border: '1px solid red'}}/>
             */}
 

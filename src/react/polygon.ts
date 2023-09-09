@@ -1,11 +1,13 @@
-import {SvgAttr} from "../interface";
+import {SupportEvents, SvgAttr} from "../interface";
 import {Fragment, createElement, useEffect, useContext, useRef} from "react";
 import type {FC} from "react";
 import ShapePolygon from '../shape/polygon'
 import Context from "./context";
 import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
+import {useInstance} from "./hooks";
+import ShapeEllipse from "../shape/ellipse";
 
-export interface PolygonProps extends Partial<SvgAttr> {
+export interface PolygonProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     points: string
 }
 
@@ -19,44 +21,40 @@ const formatter = (points: string) => {
     })
 }
 
-const Polygon: FC<PolygonProps> = ({points, ...style}) => {
+const Polygon: FC<PolygonProps> = ({
+                                       points,
+                                       onDblClick,
+                                       onClick,
+                                       onContextMenu,
+                                       onMouseMove,
+                                       onMouseEnter,
+                                       onMouseLeave,
+                                       onDragStart,
+                                       onDrag,
+                                       onDragEnd,
+                                       ...style
+                                   }) => {
 
-    const _styles = getSvgComputedStyle(style)
-    const {instance} = useContext(Context);
-
-    const ref = useRef<ShapePolygon>()
-
-    if (!ref.current) {
-        ref.current = new ShapePolygon({
+    useInstance(
+        style,
+        {
+            onDblClick,
+            onClick,
+            onContextMenu,
+            onMouseMove,
+            onMouseEnter,
+            onMouseLeave,
+            onDragStart,
+            onDrag,
+            onDragEnd,
+        },
+        () => new ShapePolygon({
             points: formatter(points)
-        })
-        ref.current.style = svgAttrToCanvas(style)
-        instance?.addView(ref.current)
-    } else {
-        ref.current.points = formatter(points);
-        ref.current.style = svgAttrToCanvas(style)
-    }
-
-    useEffect(() => {
-        instance?.render();
-    }, [
-        points,
-        _styles.fill,
-        _styles.fillRule,
-        _styles.stroke,
-        _styles.strokeDasharray,
-        _styles.strokeDashoffset,
-        _styles.strokeLinecap,
-        _styles.strokeLinejoin,
-        _styles.strokeMiterlimit,
-        _styles.strokeWidth
-    ])
-
-    useEffect(() => {
-        return () => {
-            instance?.removeView(ref.current!)
-        }
-    }, [])
+        }),
+        [
+            points,
+        ]
+    )
 
     return createElement(Fragment)
 }
