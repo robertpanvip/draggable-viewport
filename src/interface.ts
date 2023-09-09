@@ -112,16 +112,21 @@ export type ViewStyle = {
 export type SvgAttr = {
     id: string;
     fill: string;
+    fillOpacity: string | number
+
     filter: string
     fillRule: CanvasFillRule;
+
     stroke: string;
+    strokeOpacity: string | number;
     strokeDasharray: string;
     strokeDashoffset: string;
     strokeLinecap: string;
     strokeLinejoin: string;
     strokeMiterlimit: string;
     strokeWidth: string | number;
-    opacity: string | number
+    opacity: string | number;
+
     style: Partial<Omit<SvgAttr, "style">>
 }
 

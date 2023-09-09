@@ -96,7 +96,11 @@ export default function App() {
                         </filter>
                     </defs>
                 </svg>*/}
-                <SvgG transform={'translate(100,100)'}>
+                <SvgText x={100} y={100} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0}
+                         style={{fontSize: 50}}>
+                    这是我的测试这是我的测试这是我的测试
+                </SvgText>
+               {/* <SvgG transform={'translate(100,100)'}>
                     <Defs>
                         <Filter id="f1" x="0" y="0">
                             <FeGaussianBlur in="SourceGraphic" stdDeviation="15"/>
@@ -113,6 +117,7 @@ export default function App() {
                             style={{
                                 //stroke: "red",
                                 fill: "yellow",
+                                fillOpacity: '0.5',
                                 //strokeWidth: 5,
                             }}
                         />
@@ -134,10 +139,11 @@ export default function App() {
                     />
 
                     <Use xlinkHref='#svg-rect'/>
-                </SvgG>
-                <SvgImage
+                </SvgG>*/}
+                {/*  <SvgImage
                     x={200}
                     y={200}
+                    width={200}
                     style={{
                         //stroke: "purple",
                         //strokeWidth: 1,
@@ -146,7 +152,7 @@ export default function App() {
                         //console.log('move', e)
                     }}
                     xlinkHref={'https://ts1.cn.mm.bing.net/th/id/R-C.171e8fe1aa1544a1868ab710eed82d82?rik=FLPxvVVL9C9bnQ&riu=http%3a%2f%2fwww.pp3.cn%2fuploads%2fallimg%2f200710%2f14-200G00Z321.jpg&ehk=Lb0IHCCZIdqYQOi28m%2borU8c1ARGbTEC%2f8WYzfwRuHo%3d&risl=&pid=ImgRaw&r=0'}
-                />
+                />*/}
             </Svg>
             {/* <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>

@@ -1,18 +1,24 @@
 import View from "./view";
 import {
-    calculateVerticalPoint, genClosePath,
-    getPathBounds, getTotalLength,
+    genClosePath,
+    getPathBounds,
+    getTotalLength,
     measureHeight,
     measureWidth,
     renderText,
+    stringifyFont,
     svgPathToTangentPoints
 } from "../utils/convert";
 import {Point, TangentPoint} from "../interface";
-import Path from "./path";
+import parseFont, {IFont} from "parse-css-font"
+import CanvasManager from "../canvas";
 
 type TextStyle = {
     cursor?: string;
     font?: string;
+    fontSize?: number;
+    fontFamily?: string;
+    fontWeight?: string;
     overflow?: 'default' | "hidden" | 'ellipsis';//hidden。这个关键字会在内容区域隐藏文本 ellipsis 这个关键字会用一个省略号（'…'）来表示被截断的文本。这个省略号被添加在内容区域中，因此会减少显示的文本。如果空间太小以至于连省略号都容纳不下，那么这个省略号也会被截断
     wrap?: 'wrap' | 'nowrap'
     color?: string | CanvasGradient | CanvasPattern;
@@ -35,7 +41,6 @@ type TextConfig = {
 
 const defaultStyle = {
     color: 'black',
-    font: '20px Georgia',
     textBaseline: 'top' as const,
     textAlign: 'left' as const,
     linePadding: 10,
@@ -46,7 +51,8 @@ const defaultStyle = {
 
 interface PrivateScope {
     closePathPoints: Point[];
-    wordPoints: TangentPoint[]
+    wordPoints: TangentPoint[];
+    font: string
 }
 
 const vm = new WeakMap<Text, PrivateScope>()
@@ -95,26 +101,44 @@ class Text extends View {
         this.path = path || '';
         this.dx = startOffset || dx || 0;
         this.dy = dy || 0
-        this.spacing = spacing || 0
-        this.style = style;
-        this.maxWidth = this.maxWidth || getTotalLength(this.path)
+        this.spacing = spacing || 0;
+        this.style = {
+            ...style,
+            font: style.font ? stringifyFont(parseFont(style.font!)) : undefined
+        };
+        this.maxWidth = this.maxWidth || getTotalLength(this.path);
         vm.set(this, {
+            font: style.font || "",
             closePathPoints: genClosePath(this.path, this.style.font!, this.dy, this.x, this.y),
-            wordPoints: path ? svgPathToTangentPoints({
-                d: path,
-                x: this.x,
-                y: this.y,
-                text: this.text,
-                font: this.style.font || "",
-                dx: this.dx,
-                dy: this.dy,
-                spacing: this.spacing
-            }) : []
+            wordPoints: []
         })
     }
 
+    get vp() {
+        return super.vp;
+    }
+
+    set vp(vp: CanvasManager) {
+        super.vp = vp;
+        const iFont = this.parseFont();
+        const font = stringifyFont(iFont)
+        vm.get(this)!.font = font;
+        vm.get(this)!.wordPoints = this.path ? svgPathToTangentPoints({
+            d: this.path,
+            x: this.x,
+            y: this.y,
+            text: this.text,
+            font: font,
+            dx: this.dx,
+            dy: this.dy,
+            spacing: this.spacing
+        }) : []
+
+    }
+
     get calcTexts() {
-        const {wrap, font, overflow} = this.style;
+        const {wrap, overflow} = this.style;
+        const font = vm.get(this)!.font
         if (!this.maxWidth) {
             return [this.text]
         }
@@ -145,12 +169,13 @@ class Text extends View {
 
     getBBox() {
         if (this.path) {
-            return getPathBounds(this.getShape()[0],this.ctx!)
+            return getPathBounds(this.getShape()[0], this.ctx!)
         }
-        const h = measureHeight(this.style.font!);
+        const font = vm.get(this)!.font
+        const h = measureHeight(font);
         const sizes = this.calcTexts.map((text, index) => {
             return {
-                w: measureWidth(text, this.style.font!),
+                w: measureWidth(text, font),
                 h: h + this.style.linePadding! * 2,
             }
         })
@@ -166,16 +191,40 @@ class Text extends View {
         return this.vp.getMatrix().multiply(this.matrix)
     }
 
+    parseFont() {
+        const ctx = this.ctx!;
+        let font;
+        if (this.style.font) {
+            font = parseFont(this.style.font) as IFont;
+        } else {
+            font = parseFont(ctx!.font) as IFont;
+        }
+        if (this.style.fontSize) {
+            font.size = this.style.fontSize + 'px'
+        }
+        if (this.style.fontFamily) {
+            const family = font.family || [];
+            family.push(this.style.fontFamily)
+            font.family = family
+        }
+        if (this.style.fontWeight) {
+            font.weight = this.style.fontWeight
+        }
+        return font
+    }
+
     render() {
         const ctx = this.ctx!;
         ctx?.save()
         ctx!.setTransform(this.getRenderMatrix());
         ctx!.fillStyle = this.style?.color!;
-        //ctx!.strokeStyle = this.style?.borderColor!;
-        if (this.style.font) {
-            ctx!.font = this.style.font;
+        const font = vm.get(this)!.font
+        ctx!.font = font
+        if (this.style.textBaseline!) {
             ctx!.textBaseline = this.style.textBaseline!;
-            ctx!.textAlign = this.style.textAlign!
+        }
+        if (this.style.textAlign!) {
+            ctx!.textAlign = this.style.textAlign!;
         }
         if (this.path) {
             // 绘制围绕路径的文字
@@ -203,7 +252,7 @@ class Text extends View {
                 this.renderShape()
             }
         } else {
-            const h = measureHeight(this.style.font!)
+            const h = measureHeight(font)
             this.calcTexts.forEach((text, index) => {
                 ctx!.fillText(text, this.x, this.y + h * index + this.style.linePadding! * (index * 2 + 1))
             })
@@ -219,7 +268,8 @@ class Text extends View {
     }
 
     getShape(): Path2D[] {
-        const h = measureHeight(this.style.font!)
+        const font = vm.get(this)!.font
+        const h = measureHeight(font)
         const {x, y} = this;
         if (this.path) {
             const closePathPoints = vm.get(this)!.closePathPoints || []

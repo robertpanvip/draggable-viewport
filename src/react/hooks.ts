@@ -85,7 +85,6 @@ export function useInstance<T extends object>(
     const _styles = getSvgComputedStyle(style || {})
     const {instance, setDefs} = useContext(Context);
     const defsContext = useContext(DefsContext);
-    console.log('defsContext', defsContext);
     const ref = useRef<View>();
     if (!ref.current && style.id) {
         setDefs(style.id, createElement(copy.FC, {...copy.props}))

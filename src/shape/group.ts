@@ -141,7 +141,7 @@ class Group extends Events {
 
     getSrcElement(point: Point): Group | null {
         let srcEle = null;
-
+        //console.time("getSrcElement")
         const loop = (ele: Group): boolean => {
             const contains = ele.isPointContains(point);
 
@@ -162,6 +162,7 @@ class Group extends Events {
             return false;
         };
         loop(this!);
+        //console.timeEnd("getSrcElement")
         return srcEle;
     }
 

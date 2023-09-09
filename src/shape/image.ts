@@ -54,10 +54,18 @@ class Image extends Rect {
             vm.get(this)!.angle = 0;
             clearTimeout(timer);
             if (!this.w) {
-                this.w = img.width
+                if (this.h) {
+                    this.w = img.width * this.h / img.height
+                } else {
+                    this.w = img.width
+                }
             }
             if (!this.h) {
-                this.h = img.height
+                if (this.w) {
+                    this.h = img.height * this.w / img.width
+                } else {
+                    this.h = img.height
+                }
             }
             this.vp?.render();
         }

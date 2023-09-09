@@ -33,6 +33,8 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
     public grid: boolean = false
     public axis: boolean = false
 
+    private task: number | undefined;
+
     constructor({
                     viewport,
                     scaling,
@@ -133,7 +135,7 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
         ctx.restore()
     }
 
-    render() {
+    renderGroup() {
         if (this.canvas) {
             this.canvas!.width = this.canvas!.width
         }
@@ -147,6 +149,13 @@ export default class CanvasManager extends Viewport<HTMLCanvasElement> {
             this.ctx?.setTransform(this.getMatrix())
             child.render()
         })
+    }
+
+    render() {
+        if (this.task) {
+            cancelAnimationFrame(this.task)
+        }
+        this.task = requestAnimationFrame(() => this.renderGroup())
     }
 
     broadcast<T>(name: string, args: T) {

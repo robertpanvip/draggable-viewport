@@ -1,4 +1,6 @@
 import type {Point, SvgAttr, TangentPoint, ViewStyle} from "../interface";
+import tinyColor from "tinycolor2";
+import type {IFont, ISystemFont} from "parse-css-font";
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d', {willReadFrequently: true})!
@@ -256,9 +258,12 @@ export function getPathBounds(path: Path2D, ctx1: CanvasRenderingContext2D) {
 
 const NameMap = {
     fill: 'fillStyle',
+    fillOpacity: "fillOpacity",
+
     filter: 'filter',
     fillRule: 'fillRule',
     stroke: 'strokeStyle',
+    strokeOpacity: 'strokeOpacity',
     //strokeDasharray: 'strokeDasharray',
     strokeDashoffset: 'lineDashOffset',
     strokeLinecap: 'lineCap',
@@ -269,7 +274,24 @@ const NameMap = {
 }
 
 export function svgAttrToCanvas(attrs: Partial<SvgAttr>): Partial<ViewStyle> {
-    const computedStyles = getSvgComputedStyle(attrs)
+    const computedStyles = getSvgComputedStyle(attrs);
+
+    function remakeColor(name: "fill" | "stroke", opacityName: "fillOpacity" | "strokeOpacity") {
+        if (computedStyles[name]) {
+            const color = tinyColor(computedStyles[name])
+            if (color.isValid()) {
+                if (computedStyles[opacityName] !== undefined) {
+                    color.setAlpha(parseFloat(computedStyles[opacityName] + ''));
+                }
+                computedStyles[name] = color.toRgbString()
+            } else {
+                computedStyles[name] = ""
+            }
+        }
+    }
+
+    remakeColor("fill", "fillOpacity");
+    remakeColor("stroke", "strokeOpacity");
     return Object.fromEntries(Object.entries(computedStyles).map(([key, value]) => {
         // @ts-ignore
         return [NameMap[key], value]
@@ -298,21 +320,41 @@ export function parseTransformToMatrix(transform: string): SVGMatrix {
     return transformList!.consolidate()!.matrix;
 }
 
-export function genAxiosPath(d: string) {
-    // 提取路径中的所有坐标
-    const regex = /[-+]?\d*\.?\d+/g;
-    const coordinates = d.match(regex);
 
-// 计算路径的平移值
-    const x = coordinates ? parseFloat(coordinates[0]) : 0;
-    const y = coordinates ? parseFloat(coordinates[1]) : 0;
 
-// 替换路径字符串中的坐标
-    return d.replace(regex, (match, index) => {
-        if (index % 2 === 0) {
-            return (parseFloat(match) - x).toFixed(1);
-        } else {
-            return (parseFloat(match) - y).toFixed(1);
-        }
-    });
+export function stringifyFont(iFont: ISystemFont | IFont) {
+    if ((iFont as ISystemFont).system) {
+        return (iFont as ISystemFont).system
+    }
+    const font = iFont as IFont
+    let fontString = '';
+
+    if (font.style) {
+        fontString += font.style + ' ';
+    }
+
+    if (font.variant) {
+        fontString += font.variant + ' ';
+    }
+
+    if (font.weight) {
+        fontString += font.weight + ' ';
+    }
+
+    if (font.stretch) {
+        fontString += font.stretch + ' ';
+    }
+
+    if (font.size) {
+        fontString += font.size + ' ';
+    }
+
+    if (font.lineHeight) {
+        fontString += '/' + font.lineHeight + ' ';
+    }
+
+    if (font.family) {
+        fontString += "'" + font.family.join("', '") + "'";
+    }
+    return fontString
 }

@@ -3,9 +3,9 @@ import {Fragment, createElement, useEffect, useContext, useRef} from "react";
 import type {FC} from "react";
 import ShapeText from '../shape/text'
 import Context from "./context";
-import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
+import {getSvgComputedStyle} from "../utils/convert";
 
-export interface TextProps extends Partial<SvgAttr> {
+export interface TextProps extends Partial<Omit<SvgAttr, "style">> {
     x: number | string,
     y: number | string,
     dx?: number | string;
@@ -13,7 +13,12 @@ export interface TextProps extends Partial<SvgAttr> {
     children?: string,
     path?: string;
     startOffset?: number;
-    spacing?: number
+    spacing?: number;
+    style?: Partial<SvgAttr> & {
+        fontSize?: number;
+        fontFamily?: string;
+        fontWeight?: string;
+    }
 }
 
 const Text: FC<TextProps> = ({
@@ -36,6 +41,9 @@ const Text: FC<TextProps> = ({
             startOffset,
             spacing
         })
+        ref.current.style.fontSize = style.style?.fontSize;
+        ref.current.style.fontFamily = style.style?.fontFamily;
+        ref.current.style.fontWeight = style.style?.fontWeight;
         //ref.current.style = svgAttrToCanvas(style)
         instance?.add(ref.current)
     } else {
