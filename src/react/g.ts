@@ -15,7 +15,7 @@ const G: FC<GProps> = ({
                            transform, children, ...style
                        }) => {
     const _styles = getSvgComputedStyle(style)
-    const {instance} = useContext(Context);
+    const {instance, setDefs, getDefsById} = useContext(Context);
 
     const ref = useRef<ShapeG>()
 
@@ -52,6 +52,8 @@ const G: FC<GProps> = ({
         }
     }, [])
     const value = useCreation<ContextConfig>(() => ({
+        setDefs,
+        getDefsById,
         instance: {
             add(view) {
                 ref.current!.addChild(view)
@@ -63,7 +65,7 @@ const G: FC<GProps> = ({
                 ref.current!.removeChild(view)
             }
         }
-    }), [ref.current])
+    }), [ref.current, setDefs, getDefsById])
     return value ? createElement(Context.Provider, {value}, children) : createElement(Fragment)
 }
 export default G

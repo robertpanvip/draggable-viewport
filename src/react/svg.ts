@@ -1,8 +1,8 @@
 import {createElement, useEffect, useRef, Fragment, useState} from "react";
-import type {FC, ReactNode} from "react";
+import type {FC, ReactNode, ReactElement} from "react";
 import Context, {ContextConfig} from "./context";
 import CanvasManager from "../canvas";
-import { useCreation } from "./hooks";
+import {useCreation} from "./hooks";
 
 export interface SvgProps {
     children: ReactNode
@@ -15,6 +15,8 @@ const Svg: FC<SvgProps> = ({children, width, height, ...rest}) => {
 
     const svgRef = useRef<CanvasManager>()
     const [mounted, setMounted] = useState<boolean>(false)
+
+    const defs = useRef<{ [key: string]: ReactElement }>({})
 
     useEffect(() => {
         svgRef.current = new CanvasManager({
@@ -31,15 +33,21 @@ const Svg: FC<SvgProps> = ({children, width, height, ...rest}) => {
 
     const canvasJsx = createElement('canvas', {ref: canvasRef, width, height}, mounted && children)
     const value = useCreation<ContextConfig>(() => ({
+        setDefs(id, val) {
+            defs.current[id] = val;
+        },
+        getDefsById(id) {
+            return defs.current[id]
+        },
         instance: {
-            add(view){
+
+            add(view) {
                 svgRef.current!.addView(view);
-                console.log(svgRef.current!.group);
             },
-            update(){
+            update() {
                 svgRef.current!.render()
             },
-            removeChild(view){
+            removeChild(view) {
                 svgRef.current!.removeView(view)
             }
         }

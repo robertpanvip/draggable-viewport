@@ -10,21 +10,26 @@ export interface CircleProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     cy?: number | string,
 }
 
-const Circle: FC<CircleProps> = ({
-                                     r = 0, cx = 0, cy = 0,
-                                     onDblClick,
-                                     onClick,
-                                     onContextMenu,
-                                     onMouseMove,
-                                     onMouseEnter,
-                                     onMouseLeave,
-                                     onDragStart,
-                                     onDrag,
-                                     onDragEnd,
-                                     ...style
-                                 }) => {
+const Circle: FC<CircleProps> = (props) => {
+    const {
+        r = 0, cx = 0, cy = 0,
+        onDblClick,
+        onClick,
+        onContextMenu,
+        onMouseMove,
+        onMouseEnter,
+        onMouseLeave,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...style
+    } = props
 
     useInstance(
+        {
+            FC: Circle,
+            props
+        },
         style,
         {
             onDblClick,

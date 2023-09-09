@@ -55,7 +55,6 @@ class Path extends View {
             ctx.globalAlpha = globalAlpha
         }
 
-
         const path = this.getShape()[0]
 
         if (this.style.fillStyle) {

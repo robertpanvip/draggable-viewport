@@ -1,19 +1,20 @@
 import {SupportEvents, SvgAttr} from "../interface";
 import {Fragment, createElement} from "react";
 import type {FC} from "react";
-import ShapeRect from '../shape/rect'
+import ShapeImage from '../shape/image'
 import {useInstance} from "./hooks";
 
-export interface RectProps extends Partial<SvgAttr>, Partial<SupportEvents> {
-    x: number | string,
-    y: number | string,
-    width: number | string,
-    height: number | string,
+export interface ImageProps extends Partial<SvgAttr>, Partial<SupportEvents> {
+    x?: number | string,
+    y?: number | string,
+    width?: number | string,
+    height?: number | string,
     rx?: number | string,
     ry?: number | string,
+    xlinkHref?: string
 }
 
-const Rect: FC<RectProps> = (props) => {
+const Image: FC<ImageProps> = (props) => {
     const {
         x,
         y,
@@ -21,6 +22,7 @@ const Rect: FC<RectProps> = (props) => {
         ry = 0,
         width,
         height,
+        xlinkHref,
         onDblClick,
         onClick,
         onContextMenu,
@@ -35,7 +37,7 @@ const Rect: FC<RectProps> = (props) => {
 
     useInstance(
         {
-            FC: Rect,
+            FC: Image,
             props
         },
         style,
@@ -50,17 +52,20 @@ const Rect: FC<RectProps> = (props) => {
             onDrag,
             onDragEnd,
         },
-        () => new ShapeRect({
-            x: parseFloat(`${x}`),
-            y: parseFloat(`${y}`),
-            w: parseFloat(`${width}`),
-            h: parseFloat(`${height}`),
-            rx: parseFloat(`${rx}`),
-            ry: parseFloat(`${ry}`),
-        }), [
+        () => {
+            return new ShapeImage({
+                x: parseFloat(`${x}`),
+                y: parseFloat(`${y}`),
+                w: parseFloat(`${width}`),
+                h: parseFloat(`${height}`),
+                rx: parseFloat(`${rx}`),
+                ry: parseFloat(`${ry}`),
+                xlinkHref: xlinkHref
+            });
+        }, [
             x, y, width, height, rx, ry,
         ])
 
     return createElement(Fragment)
 }
-export default Rect
+export default Image

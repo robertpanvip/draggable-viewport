@@ -1,8 +1,7 @@
-import {useRef, useMemo, useContext, useEffect} from "react";
-import type {DependencyList} from "react";
+import {useRef, useMemo, useContext, useEffect, createElement} from "react";
+import type {DependencyList, FC} from "react";
 import {getSvgComputedStyle, svgAttrToCanvas} from "../utils/convert";
-import Context from "./context";
-import ShapeRect from "../shape/rect";
+import Context, {DefsContext} from "./context";
 import {CanvasEvent, SupportEvents, SvgAttr} from "../interface";
 import View from "../shape/view";
 
@@ -65,7 +64,9 @@ export function useMemoizedFn<T extends noop>(fn: T) {
     return memoizedFn.current as T;
 }
 
-export function useInstance(
+
+export function useInstance<T extends object>(
+    copy: { FC: FC<T>, props: T },
     style: Partial<SvgAttr>,
     {
         onDblClick,
@@ -82,8 +83,13 @@ export function useInstance(
     deps: DependencyList
 ) {
     const _styles = getSvgComputedStyle(style || {})
-    const {instance} = useContext(Context);
+    const {instance, setDefs} = useContext(Context);
+    const defsContext = useContext(DefsContext);
+    console.log('defsContext', defsContext);
     const ref = useRef<View>();
+    if (!ref.current && style.id) {
+        setDefs(style.id, createElement(copy.FC, {...copy.props}))
+    }
 
     const dblClickListener = useMemoizedFn((e: CanvasEvent) => {
         return onDblClick?.(e)
@@ -144,7 +150,9 @@ export function useInstance(
     ])
 
     useEffect(() => {
-        instance?.add(ref.current!)
+        if (!defsContext.underDefs) {
+            instance?.add(ref.current!)
+        }
         return () => {
             ref.current?.removeEventListener('dblclick', dblClickListener)
             ref.current?.removeEventListener('click', clickListener)

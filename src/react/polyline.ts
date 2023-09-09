@@ -18,20 +18,25 @@ const formatter = (points: string) => {
     })
 }
 
-const Polyline: FC<PolylineProps> = ({
-                                         points,
-                                         onDblClick,
-                                         onClick,
-                                         onContextMenu,
-                                         onMouseMove,
-                                         onMouseEnter,
-                                         onMouseLeave,
-                                         onDragStart,
-                                         onDrag,
-                                         onDragEnd,
-                                         ...style
-                                     }) => {
+const Polyline: FC<PolylineProps> = (props) => {
+    const {
+        points,
+        onDblClick,
+        onClick,
+        onContextMenu,
+        onMouseMove,
+        onMouseEnter,
+        onMouseLeave,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...style
+    } = props;
     useInstance(
+        {
+            FC: Polyline,
+            props,
+        },
         style,
         {
             onDblClick,

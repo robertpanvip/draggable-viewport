@@ -110,7 +110,9 @@ export type ViewStyle = {
 }
 
 export type SvgAttr = {
+    id: string;
     fill: string;
+    filter: string
     fillRule: CanvasFillRule;
     stroke: string;
     strokeDasharray: string;

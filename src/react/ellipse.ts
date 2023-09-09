@@ -11,21 +11,26 @@ export interface EllipseProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     ry: number,
 }
 
-const Ellipse: FC<EllipseProps> = ({
-                                       rx, ry, cx = 0, cy = 0,
-                                       onDblClick,
-                                       onClick,
-                                       onContextMenu,
-                                       onMouseMove,
-                                       onMouseEnter,
-                                       onMouseLeave,
-                                       onDragStart,
-                                       onDrag,
-                                       onDragEnd,
-                                       ...style
-                                   }) => {
+const Ellipse: FC<EllipseProps> = (props) => {
+    const {
+        rx, ry, cx = 0, cy = 0,
+        onDblClick,
+        onClick,
+        onContextMenu,
+        onMouseMove,
+        onMouseEnter,
+        onMouseLeave,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...style
+    } = props
 
     useInstance(
+        {
+            FC: Ellipse,
+            props,
+        },
         style,
         {
             onDblClick,

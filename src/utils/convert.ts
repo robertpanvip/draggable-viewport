@@ -256,6 +256,7 @@ export function getPathBounds(path: Path2D, ctx1: CanvasRenderingContext2D) {
 
 const NameMap = {
     fill: 'fillStyle',
+    filter: 'filter',
     fillRule: 'fillRule',
     stroke: 'strokeStyle',
     //strokeDasharray: 'strokeDasharray',
@@ -295,4 +296,23 @@ export function parseTransformToMatrix(transform: string): SVGMatrix {
 
     svgElement.setAttribute("transform", transform);
     return transformList!.consolidate()!.matrix;
+}
+
+export function genAxiosPath(d: string) {
+    // 提取路径中的所有坐标
+    const regex = /[-+]?\d*\.?\d+/g;
+    const coordinates = d.match(regex);
+
+// 计算路径的平移值
+    const x = coordinates ? parseFloat(coordinates[0]) : 0;
+    const y = coordinates ? parseFloat(coordinates[1]) : 0;
+
+// 替换路径字符串中的坐标
+    return d.replace(regex, (match, index) => {
+        if (index % 2 === 0) {
+            return (parseFloat(match) - x).toFixed(1);
+        } else {
+            return (parseFloat(match) - y).toFixed(1);
+        }
+    });
 }

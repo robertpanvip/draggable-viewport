@@ -12,11 +12,15 @@ import SvgPath from "../../src/react/path";
 import SvgPolygon from "../../src/react/polygon";
 import SvgPolyline from "../../src/react/polyline";
 import SvgRect from "../../src/react/rect"
+import SvgImage from "../../src/react/image"
 import SvgEllipse from "../../src/react/ellipse"
 import SvgCircle from "../../src/react/circle"
 import SvgText from "../../src/react/text"
 import SvgG from "../../src/react/g"
+import Defs, {SvgElement} from "../../src/react/defs";
+import Use from "../../src/shape/use";
 
+const {FeGaussianBlur, Filter} = SvgElement;
 const toImgSrc = (svg: SVGSVGElement) => {
     // 这里一定要给svg设置这两个命名空间，包含了image 则也需要加上xmlns:xlink 否则浏览器会报错不能下载图片
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
@@ -29,143 +33,7 @@ const toImgSrc = (svg: SVGSVGElement) => {
 
 
 export default function App() {
-    const svgRef = React.useRef<SVGSVGElement>(null)
-    const gRef = React.useRef<SVGGElement>(null)
-    const canvasRef = React.useRef<HTMLCanvasElement>(null)
-
-    React.useEffect(() => {
-        /* const m = new SvgManager({
-             svg: svgRef.current!,
-             viewport: gRef.current!,
-             minScale: 0.2,
-             maxScale: 4
-         })
-         m.startListening()
-         m.translateBy(100, 100)*/
-
-       /* const img = new Image()
-        img.src = toImgSrc(svgRef.current!)
-        img.onload = () => {
-            const canvas = new CanvasManager({
-                viewport: canvasRef.current!,
-                minScale: 0.2,
-                maxScale: 8,
-                grid: true,
-                axis: true
-            })
-            canvas.translate(100, 100)
-            const rect1 = new Rect({x: 0, y: 0, w: 200, h: 200})
-            rect1.name = 'rect1'
-            rect1.style.borderRadius = 20
-            rect1.addEventListener('dragStart', (e) => {
-                //console.log('dragStart1')
-
-            })
-            const rect2 = new Rect({x: 150, y: 150, w: 200, h: 200})
-            rect2.addEventListener('dragStart', (e) => {
-                //console.log('dragStart2')
-                e.stopPropagation();
-            })
-
-            rect2.addEventListener('drag', (e) => {
-                //console.log('drag')
-                e.stopPropagation();
-            })
-            rect2.addEventListener('dragEnd', (e) => {
-                //console.log('dragEnd')
-                e.stopPropagation();
-            })
-            rect2.addEventListener('click', (e) => {
-                //console.log('click')
-                e.stopPropagation();
-            })
-            rect2.addEventListener('mouseMove', (e) => {
-                //console.log('mouseMove',e)
-                //e.stopPropagation();
-            })
-            rect2.addEventListener('mouseEnter', (e) => {
-                //console.log('mouseEnter',e)
-                //e.stopPropagation();
-            })
-            rect2.addEventListener('mouseLeave', (e) => {
-                //console.log('mouseLeave',e)
-                //e.stopPropagation();
-            })
-            rect2.style.background = 'red'
-            rect2.style.borderRadius = 100
-            rect2.style.cursor = 'move'
-            rect2.name = 'rect2';
-            //rect2.rotate(90)
-            //console.log(rect1, rect2);
-            rect1.addChild(rect2)
-            //canvas.addView(rect1)
-            //rect1.translate(50, 50)
-            //canvas.addView(rect2)
-            const text = new Text();
-            text.x = 250
-            text.y = 250;
-            text.drawBBox = true;
-            text.text = '这是测试文字安徽省士大夫士大夫'
-            //text.style.wrap = 'nowrap';
-            text.style.color = 'red';
-            text.style.cursor = 'pointer';
-            text.maxWidth = 120;
-            //canvas.addView(text)
-            const line = new Line({x1: 0, y1: 0, x2: 150, y2: 150, strokeWidth: 20});
-            line.drawBBox = true;
-            //canvas.addView(line)
-            const ellipse = new Ellipse({rx: 100, ry: 50, cx: 0, cy: 0, rotation: Math.PI / 4})
-
-            ellipse.drawBBox = true;
-            ellipse.drawShape = true;
-            //canvas.addView(ellipse)
-
-            const circle = new Circle({cx: 100, cy: 100, r: 50})
-
-            circle.drawBBox = true;
-            circle.drawShape = true;
-            // canvas.addView(circle)
-            const ad1 = `M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`
-            const ad2 = `M 10,10 h 10
-       m  0,10 h 10
-       m  0,10 h 10
-       M 40,20 h 10
-       m  0,10 h 10
-       m  0,10 h 10
-       m  0,10 h 10
-       M 50,50 h 10
-       m-20,10 h 10
-       m-20,10 h 10
-       m-20,10 h 10`
-            const ad3 = `M 10,10
-           L 90,90
-           V 10
-           H 50`
-            const ad4 = `M 10,90
-           C 30,90 25,10 50,10
-           S 70,90 90,90`
-            const ad5 = `M 10,50
-           Q 25,25 40,50
-           t 30,0 30,0 30,0 30,0 30,0`
-            console.log(ad1);
-            const path = new Path({
-                d: ad1
-            })
-            //path.style.strokeStyle='red'
-            path.drawBBox = true;
-            path.drawShape = true;
-            canvas.addView(path)
-
-            canvas.startListening()
-        }*/
-
-        return () => {
-            //m.stopListening()
-        }
-    }, [])
     const [d, setD] = React.useState<string>(`M 10,30 A 20,20 0,0,1 50,30 A 20,20 0,0,1 90,30 Q 90,60 50,90 Q 10,60 10,30 z`)
-
-
     React.useEffect(() => {
         setTimeout(() => {
             console.log('setD');
@@ -178,7 +46,7 @@ export default function App() {
     return (
         <div>
             <Svg width={1920} height={1080}>
-               {/* <SvgPath d={d}
+                {/* <SvgPath d={d}
                          stroke='red'/>
                 <SvgPolygon points={'100,10 40,198 190,78 10,78 160,198'}
                             style={{
@@ -221,37 +89,66 @@ export default function App() {
                 <SvgText x={300} y={300} path={'M75,20 a1,1 0 0,0 100,0'} startOffset={0} dy={5} spacing={0} >
                     这是我的测试这是我的测试这是我的测试
                 </SvgText>*/}
+                {/*<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style={{'display':'none'}}>
+                    <defs>
+                        <filter id="f1" x="0" y="0">
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
+                        </filter>
+                    </defs>
+                </svg>*/}
                 <SvgG transform={'translate(100,100)'}>
+                    <Defs>
+                        <Filter id="f1" x="0" y="0">
+                            <FeGaussianBlur in="SourceGraphic" stdDeviation="15"/>
+                        </Filter>
+                        <SvgRect
+                            id='svg-rect'
+                            x={100}
+                            y={100}
+                            //rx={200}
+                            //ry={200}
+                            width={100}
+                            height={100}
+                            filter="url(#f1)"
+                            style={{
+                                //stroke: "red",
+                                fill: "yellow",
+                                //strokeWidth: 5,
+                            }}
+                        />
+                    </Defs>
                     <SvgRect
                         x={200}
                         y={200}
                         //rx={200}
-                       //ry={200}
+                        //ry={200}
                         width={200}
                         height={200}
                         style={{
                             stroke: "purple",
                             strokeWidth: 5,
                         }}
-                        onMouseMove={(e)=>{
-                            console.log('move',e)
+                        onMouseMove={(e) => {
+                            //console.log('move', e)
                         }}
                     />
-                    <SvgRect
-                        x={100}
-                        y={100}
-                        //rx={200}
-                        //ry={200}
-                        width={100}
-                        height={100}
-                        style={{
-                            stroke: "red",
-                            strokeWidth: 5,
-                        }}
-                    />
+
+                    <Use xlinkHref='#svg-rect'/>
                 </SvgG>
+                <SvgImage
+                    x={200}
+                    y={200}
+                    style={{
+                        //stroke: "purple",
+                        //strokeWidth: 1,
+                    }}
+                    onMouseMove={(e) => {
+                        //console.log('move', e)
+                    }}
+                    xlinkHref={'https://ts1.cn.mm.bing.net/th/id/R-C.171e8fe1aa1544a1868ab710eed82d82?rik=FLPxvVVL9C9bnQ&riu=http%3a%2f%2fwww.pp3.cn%2fuploads%2fallimg%2f200710%2f14-200G00Z321.jpg&ehk=Lb0IHCCZIdqYQOi28m%2borU8c1ARGbTEC%2f8WYzfwRuHo%3d&risl=&pid=ImgRaw&r=0'}
+                />
             </Svg>
-           {/* <canvas width={500} height={500} ref={canvasRef}
+            {/* <canvas width={500} height={500} ref={canvasRef}
                     style={{width: 500, height: 500, border: '1px solid red'}}/>
             <div
                 style={

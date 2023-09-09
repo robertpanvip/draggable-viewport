@@ -21,21 +21,25 @@ const formatter = (points: string) => {
     })
 }
 
-const Polygon: FC<PolygonProps> = ({
-                                       points,
-                                       onDblClick,
-                                       onClick,
-                                       onContextMenu,
-                                       onMouseMove,
-                                       onMouseEnter,
-                                       onMouseLeave,
-                                       onDragStart,
-                                       onDrag,
-                                       onDragEnd,
-                                       ...style
-                                   }) => {
-
+const Polygon: FC<PolygonProps> = (props) => {
+    const {
+        points,
+        onDblClick,
+        onClick,
+        onContextMenu,
+        onMouseMove,
+        onMouseEnter,
+        onMouseLeave,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...style
+    } = props;
     useInstance(
+        {
+            FC: Polygon,
+            props,
+        },
         style,
         {
             onDblClick,

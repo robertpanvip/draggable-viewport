@@ -8,21 +8,25 @@ export interface PathProps extends Partial<SvgAttr>, Partial<SupportEvents> {
     d: string
 }
 
-const Path: FC<PathProps> = ({
-                                 d,
-                                 onDblClick,
-                                 onClick,
-                                 onContextMenu,
-                                 onMouseMove,
-                                 onMouseEnter,
-                                 onMouseLeave,
-                                 onDragStart,
-                                 onDrag,
-                                 onDragEnd,
-                                 ...style
-                             }) => {
-
+const Path: FC<PathProps> = (props) => {
+    const {
+        d,
+        onDblClick,
+        onClick,
+        onContextMenu,
+        onMouseMove,
+        onMouseEnter,
+        onMouseLeave,
+        onDragStart,
+        onDrag,
+        onDragEnd,
+        ...style
+    } = props;
     useInstance(
+        {
+            FC: Path,
+            props,
+        },
         style,
         {
             onDblClick,

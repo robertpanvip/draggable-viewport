@@ -20,8 +20,8 @@ class Rect extends Path {
 
     readonly x: number
     readonly y: number
-    readonly w: number
-    readonly h: number
+    public w: number
+    public h: number
     readonly rx: number
     readonly ry: number
 
