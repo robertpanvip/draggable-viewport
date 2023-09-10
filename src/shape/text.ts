@@ -1,7 +1,7 @@
 import View from "./view";
 import {
     genClosePath,
-    getPathBounds,
+    getBoundsFromPoints,
     getTotalLength,
     measureHeight,
     measureWidth,
@@ -109,7 +109,7 @@ class Text extends View {
         this.maxWidth = this.maxWidth || getTotalLength(this.path);
         vm.set(this, {
             font: style.font || "",
-            closePathPoints: genClosePath(this.path, this.style.font!, this.dy, this.x, this.y),
+            closePathPoints: [],
             wordPoints: []
         })
     }
@@ -123,6 +123,7 @@ class Text extends View {
         const iFont = this.parseFont();
         const font = stringifyFont(iFont)
         vm.get(this)!.font = font;
+        vm.get(this)!.closePathPoints = genClosePath(this.path, font!, this.dy, this.x, this.y);
         vm.get(this)!.wordPoints = this.path ? svgPathToTangentPoints({
             d: this.path,
             x: this.x,
@@ -168,8 +169,9 @@ class Text extends View {
     }
 
     getBBox() {
-        if (this.path) {
-            return getPathBounds(this.getShape()[0], this.ctx!)
+        const points = vm.get(this)!.closePathPoints
+        if (points.length !== 0) {
+            return getBoundsFromPoints(points)
         }
         const font = vm.get(this)!.font
         const h = measureHeight(font);

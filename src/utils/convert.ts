@@ -210,6 +210,27 @@ export function svgPathToTangentPoints(
     return points
 }
 
+export function getBoundsFromPoints(points: Point[]) {
+    let minX = points[0].x;
+    let maxX = points[0].x;
+    let minY = points[0].y;
+    let maxY = points[0].y;
+    for (let i = 0; i < points.length; i = i + 1) {
+        const point = points[i];
+        minX = Math.min(minX, point.x)
+        maxX = Math.max(maxX, point.x)
+        minY = Math.min(minY, point.y)
+        maxY = Math.max(maxY, point.y)
+    }
+    return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+    }
+}
+
+
 export function getPathBounds(path: Path2D, ctx1: CanvasRenderingContext2D) {
     canvas.width = ctx1.canvas.width!;
     canvas.height = ctx1.canvas.height!;
@@ -319,7 +340,6 @@ export function parseTransformToMatrix(transform: string): SVGMatrix {
     svgElement.setAttribute("transform", transform);
     return transformList!.consolidate()!.matrix;
 }
-
 
 
 export function stringifyFont(iFont: ISystemFont | IFont) {
